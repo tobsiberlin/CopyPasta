@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 // Hauptansicht mit Paste-inspiriertem Grid Layout
 // Main view with Paste-inspired grid layout
@@ -66,32 +67,6 @@ struct MainContentView: View {
         .sheet(isPresented: $showingPreview) {
             if let previewItem = previewItem {
                 PreviewView(item: previewItem, isPresented: $showingPreview)
-            }
-        }
-        .onKeyboardShortcut(.return, modifiers: .command) {
-            // Cmd+Return: Paste selected item
-            if let selected = selectedItem {
-                copyItemToPasteboard(selected)
-            }
-        }
-        .onKeyboardShortcut(.delete) {
-            // Delete: Remove selected item
-            if let selected = selectedItem {
-                pasteboardWatcher.deleteItem(selected)
-                selectedItem = nil
-            }
-        }
-        .onKeyboardShortcut(.space) {
-            // Space: Preview selected item
-            if let selected = selectedItem {
-                previewItem = selected
-                showingPreview = true
-            }
-        }
-        .onKeyboardShortcut(KeyEquivalent("f"), modifiers: .command) {
-            // Cmd+F: Toggle favorite
-            if let selected = selectedItem {
-                pasteboardWatcher.toggleFavorite(selected)
             }
         }
     }
@@ -207,7 +182,7 @@ struct MainContentView: View {
             if searchText.isEmpty {
                 Text("Kopiere ein Bild auf deinem iPhone oder Mac")
                     .font(.callout)
-                    .foregroundColor(.tertiary)
+                    .foregroundColor(Color.secondary.opacity(0.6))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

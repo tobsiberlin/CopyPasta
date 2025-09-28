@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 // SwiftUI View Extensions für bessere Animationen und Effekte
 // SwiftUI View Extensions for better animations and effects
@@ -74,6 +75,11 @@ struct VisualEffectView: NSViewRepresentable {
         nsView.material = material
         nsView.blendingMode = blendingMode
     }
+}
+
+// EventModifiers Extension to resolve conflicts
+extension SwiftUI.EventModifiers {
+    static let cmd = SwiftUI.EventModifiers.command
 }
 
 // Conditional View Modifier

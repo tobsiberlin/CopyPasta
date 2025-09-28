@@ -1,10 +1,11 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
+import CryptoKit
 
 // Repräsentiert einen einzelnen Clipboard-Eintrag mit allen Metadaten
 // Represents a single clipboard entry with all metadata
-struct ClipboardItem: Identifiable, Equatable, Hashable {
+struct ClipboardItem: Identifiable, Hashable {
     let id = UUID()
     let timestamp: Date
     let source: ClipboardSource
@@ -14,9 +15,19 @@ struct ClipboardItem: Identifiable, Equatable, Hashable {
     var isFavorite: Bool = false
     let hash: String // SHA256 für Deduplikation
     
+    // Hashable Implementation
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    // Equatable Implementation
+    static func == (lhs: ClipboardItem, rhs: ClipboardItem) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     // Quelle des Clipboard-Inhalts
     // Source of clipboard content
-    enum ClipboardSource {
+    enum ClipboardSource: Hashable, Equatable {
         case local
         case universalClipboard(deviceName: String?)
         case unknown
@@ -75,23 +86,7 @@ struct ClipboardItem: Identifiable, Equatable, Hashable {
     // Berechnet SHA256 Hash für Deduplikation
     // Calculates SHA256 hash for deduplication
     static func calculateHash(for data: Data) -> String {
-        let hash = data.sha256()
-        return hash.map { String(format: "%02x", $0) }.joined()
+        let hash = SHA256.hash(data: data)
+        return hash.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
-
-// Extension für SHA256 Berechnung
-// Extension for SHA256 calculation
-extension Data {
-    func sha256() -> [UInt8] {
-        var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-        self.withUnsafeBytes { bytes in
-            _ = CC_SHA256(bytes.baseAddress, CC_LONG(self.count), &hash)
-        }
-        return hash
-    }
-}
-
-// Für CommonCrypto SHA256
-// For CommonCrypto SHA256
-import CommonCrypto

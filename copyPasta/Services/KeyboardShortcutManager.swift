@@ -1,10 +1,11 @@
 import Foundation
 import SwiftUI
 import Carbon
+import Combine
 
 // Verwaltet globale Keyboard Shortcuts für CopyPasta
 // Manages global keyboard shortcuts for CopyPasta
-class KeyboardShortcutManager: ObservableObject {
+class KeyboardShortcutManager: NSObject, ObservableObject {
     static let shared = KeyboardShortcutManager()
     
     private var eventTap: CFMachPort?
@@ -21,7 +22,8 @@ class KeyboardShortcutManager: ObservableObject {
         "quickLook": (key: kVK_Space, modifiers: 0)                           // Space
     ]
     
-    private init() {
+    private override init() {
+        super.init()
         setupHotKeys()
     }
     
@@ -83,36 +85,8 @@ private struct EventHotKey {
     let action: () -> Void
 }
 
-// View Modifier für lokale Keyboard Shortcuts
-// View modifier for local keyboard shortcuts
-struct KeyboardShortcut: ViewModifier {
-    let key: KeyEquivalent
-    let modifiers: EventModifiers
-    let action: () -> Void
-    
-    func body(content: Content) -> some View {
-        content
-            .keyboardShortcut(key, modifiers: modifiers)
-            .onReceive(NotificationCenter.default.publisher(for: .keyboardShortcut)) { notification in
-                if let shortcutKey = notification.object as? String {
-                    handleShortcut(shortcutKey)
-                }
-            }
-    }
-    
-    private func handleShortcut(_ shortcut: String) {
-        // Handle shortcut
-        action()
-    }
-}
-
-// Extension für einfache Verwendung
-// Extension for easy use
-extension View {
-    func onKeyboardShortcut(_ key: KeyEquivalent, modifiers: EventModifiers = [], action: @escaping () -> Void) -> some View {
-        self.modifier(KeyboardShortcut(key: key, modifiers: modifiers, action: action))
-    }
-}
+// Simplified keyboard shortcut helper
+// No conflict with Carbon EventModifiers
 
 // Notification für Shortcuts
 extension Notification.Name {

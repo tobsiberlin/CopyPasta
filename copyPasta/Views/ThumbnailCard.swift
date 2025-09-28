@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 // Einzelne Kachel im Paste-Style für Clipboard-Items
 // Single tile in Paste style for clipboard items
@@ -44,7 +45,7 @@ struct ThumbnailCard: View {
             isDragging = true
             return createDragProvider()
         }
-        .onDrop(of: [.image], delegate: DropDelegate(isDragging: $isDragging))
+        .onDrop(of: [.image], delegate: CardDropDelegate(isDragging: $isDragging))
         .onAppear {
             loadThumbnail()
         }
@@ -129,7 +130,7 @@ struct ThumbnailCard: View {
             // Size info
             Text(formatFileSize(item.imageData.count))
                 .font(.caption2)
-                .foregroundColor(.tertiary)
+                .foregroundColor(Color.secondary.opacity(0.7))
         }
     }
     
@@ -206,7 +207,7 @@ struct ThumbnailCard: View {
 
 // Drop Delegate für Drag & Drop
 // Drop Delegate for Drag & Drop
-struct DropDelegate: DropDelegate {
+struct CardDropDelegate: DropDelegate {
     @Binding var isDragging: Bool
     
     func performDrop(info: DropInfo) -> Bool {

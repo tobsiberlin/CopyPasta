@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import AppKit
+import Combine
 
 // Verwaltet das App-Fenster und Auto-Activation
 // Manages app window and auto-activation

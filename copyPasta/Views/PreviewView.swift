@@ -149,12 +149,8 @@ struct PreviewView: View {
         .onAppear {
             loadFullImage()
         }
-        .onKeyboardShortcut(.escape) {
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("escapePressed"))) { _ in
             isPresented = false
-        }
-        .onKeyboardShortcut(.space) {
-            // Quick Look alternative
-            openInQuickLook()
         }
     }
     

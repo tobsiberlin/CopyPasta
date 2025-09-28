@@ -33,7 +33,7 @@ struct copyPastaApp: App {
 
 // App Delegate für erweiterte macOS-Funktionalität
 // App Delegate for extended macOS functionality
-class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
+class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var pasteboardWatcher: PasteboardWatcher?
     private var windowManager = WindowManager.shared
