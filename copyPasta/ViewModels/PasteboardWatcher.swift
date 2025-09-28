@@ -13,8 +13,8 @@ class PasteboardWatcher: ObservableObject {
     private let pasteboard = NSPasteboard.general
     private var timer: Timer?
     private var lastChangeCount: Int = 0
-    private let maxItems = 100 // Maximale Anzahl gespeicherter Items
-    private let pollingInterval: TimeInterval = 0.5 // Schnelles Polling für iPhone-Detection
+    private let pollingInterval: TimeInterval = 0.3 // Schnelleres Polling für bessere Detection
+    private let settings = AppSettings.shared
     
     // Universal Clipboard Detection
     private var lastClipboardUpdate = Date()
@@ -95,15 +95,17 @@ class PasteboardWatcher: ObservableObject {
         // Add item
         clipboardItems.insert(newItem, at: 0)
         
-        // Limit einhalten
-        // Maintain limit
+        // Limit einhalten basierend auf Einstellungen
+        // Maintain limit based on settings
+        let maxItems = settings.maxItems > 0 ? settings.maxItems : 999999
         if clipboardItems.count > maxItems {
             clipboardItems = Array(clipboardItems.prefix(maxItems))
         }
         
-        // Bei Universal Clipboard: Auto-Activation
-        // For Universal Clipboard: Auto-Activation
-        if case .universalClipboard = source {
+        // Auto-Activation bei neuen Items (falls aktiviert)
+        // Auto-activation for new items (if enabled)
+        if settings.autoShowOnCopy {
+            print("🔍 Auto-Activation: Neues Item erkannt, öffne Window...")
             autoActivateWindow()
         }
         
@@ -169,23 +171,23 @@ class PasteboardWatcher: ObservableObject {
     // Aktiviert das App-Fenster automatisch
     // Auto-activates the app window
     private func autoActivateWindow() {
-        // App in den Vordergrund bringen
-        // Bring app to foreground
+        print("🚀 Auto-Activation wird ausgeführt...")
+        
+        // WindowManager über Auto-Activation benachrichtigen
+        // Notify WindowManager about auto-activation
+        DispatchQueue.main.async {
+            WindowManager.shared.showWindow(animated: true)
+        }
+        
+        // App kurzzeitig in den Vordergrund bringen für Window-Fokus
+        // Briefly bring app to foreground for window focus
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         
-        // Hauptfenster anzeigen und fokussieren
-        // Show and focus main window
-        if let window = NSApp.windows.first {
-            window.makeKeyAndOrderFront(nil)
-            
-            // Sanfte Erscheinungs-Animation
-            // Smooth appearance animation
-            window.alphaValue = 0
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.3
-                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                window.animator().alphaValue = 1.0
-            }
+        // Nach kurzer Zeit wieder in Background-Modus
+        // Return to background mode after short time
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            NSApp.setActivationPolicy(.accessory)
         }
         
         // Notification für UI-Update

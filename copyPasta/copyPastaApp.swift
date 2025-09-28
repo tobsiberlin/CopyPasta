@@ -51,22 +51,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize PasteboardWatcher
         self.pasteboardWatcher = PasteboardWatcher()
         
-        // Hauptfenster mit Content View setzen
-        // Set main window with content view
-        let contentView = MainContentView()
+        // Bottom Bar View für Paste-Style Interface
+        // Bottom bar view for Paste-style interface
+        let bottomBarView = BottomBarView()
             .environmentObject(pasteboardWatcher!)
             .environmentObject(windowManager)
         
-        let hostingView = NSHostingView(rootView: contentView)
+        let hostingView = NSHostingView(rootView: bottomBarView)
         windowManager.setContentView(hostingView)
         
-        // Window-Position wiederherstellen
-        // Restore window position
-        windowManager.restoreWindowPosition()
-        
-        // Optional: Window beim Start anzeigen
-        // Optional: Show window on start
-        // windowManager.showWindow()
+        // Window initial nicht anzeigen (Auto-Activation bei Copy)
+        // Don't show window initially (auto-activation on copy)
         
         // Registriere für Notifications
         // Register for notifications
@@ -135,18 +130,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func handleAutoActivation() {
-        // Bei Universal Clipboard: App in Vordergrund mit Dock-Icon
-        // For Universal Clipboard: Bring app to foreground with dock icon
-        NSApp.setActivationPolicy(.regular)
-        windowManager.autoActivateForNewContent()
-        
-        // Nach kurzer Zeit wieder in Background-Modus
-        // Return to background mode after short time
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
-            if !self!.windowManager.isWindowVisible {
-                NSApp.setActivationPolicy(.accessory)
-            }
-        }
+        print("📱 handleAutoActivation aufgerufen")
+        // Bei Copy: Bottom Bar anzeigen
+        // On copy: Show bottom bar
+        windowManager.showWindow(animated: true)
     }
     
     func applicationWillTerminate(_ notification: Notification) {

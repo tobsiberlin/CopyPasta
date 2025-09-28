@@ -11,52 +11,52 @@ class WindowManager: NSObject, ObservableObject {
     @Published var isWindowVisible = false
     private var window: NSWindow?
     private var windowController: NSWindowController?
-    
-    // Window-Konfiguration
-    private let windowWidth: CGFloat = 800
-    private let windowHeight: CGFloat = 600
-    private let windowMinWidth: CGFloat = 400
-    private let windowMinHeight: CGFloat = 300
+    private var settings = AppSettings.shared
+    private var hideTimer: Timer?
     
     private override init() {
         super.init()
         setupWindow()
     }
     
-    // Erstellt und konfiguriert das Hauptfenster
-    // Creates and configures the main window
+    // Erstellt und konfiguriert das Paste-Style Bottom Bar Fenster
+    // Creates and configures the Paste-style bottom bar window
     private func setupWindow() {
-        // Window Style: Modern macOS mit visuellen Effekten
-        // Window Style: Modern macOS with visual effects
+        guard let screen = NSScreen.main else { return }
+        
+        // Bottom Bar Dimensionen basierend auf Bildschirm
+        // Bottom bar dimensions based on screen
+        let screenFrame = screen.visibleFrame
+        let barHeight = settings.barHeight
+        let barFrame = NSRect(
+            x: screenFrame.minX,
+            y: screenFrame.minY,
+            width: screenFrame.width,
+            height: barHeight
+        )
+        
+        // Borderless Window für Bottom Bar
+        // Borderless window for bottom bar
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: windowWidth, height: windowHeight),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            contentRect: barFrame,
+            styleMask: [.borderless, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         
-        // Window-Eigenschaften
-        // Window properties
+        // Paste-Style Window Eigenschaften
+        // Paste-style window properties
         window.title = "CopyPasta"
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .visible
-        window.isMovableByWindowBackground = true
-        window.minSize = NSSize(width: windowMinWidth, height: windowMinHeight)
-        
-        // Visueller Effekt für macOS-Style
-        // Visual effect for macOS style
         window.backgroundColor = NSColor.clear
         window.isOpaque = false
-        window.hasShadow = true
+        window.hasShadow = false
+        window.ignoresMouseEvents = false
+        window.canHide = false
         
-        // Window-Position: Zentriert auf Hauptbildschirm
-        // Window position: Centered on main screen
-        window.center()
-        
-        // Window-Level für Floating-Verhalten
-        // Window level for floating behavior
-        window.level = .floating
-        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        // Level für immer im Vordergrund aber nicht störend
+        // Level for always on top but not intrusive
+        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.floatingWindow)))
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         
         // Window-Delegate
         window.delegate = self
@@ -66,44 +66,87 @@ class WindowManager: NSObject, ObservableObject {
         // Window Controller
         let windowController = NSWindowController(window: window)
         self.windowController = windowController
+        
+        // Initial verstecken
+        // Initially hidden
+        window.orderOut(nil)
     }
     
-    // Zeigt das Fenster mit Animation
-    // Shows window with animation
+    // Zeigt die Bottom Bar mit Slide-Up Animation
+    // Shows bottom bar with slide-up animation
     func showWindow(animated: Bool = true) {
-        guard let window = window else { return }
+        guard let window = window, let screen = NSScreen.main else { return }
         
-        if animated {
-            // Fade-in Animation
+        // Timer zurücksetzen
+        // Reset timer
+        hideTimer?.invalidate()
+        
+        if animated && !isWindowVisible {
+            // Slide-up Animation wie Paste
+            // Slide-up animation like Paste
+            let screenFrame = screen.visibleFrame
+            let finalFrame = NSRect(
+                x: screenFrame.minX,
+                y: screenFrame.minY,
+                width: screenFrame.width,
+                height: settings.barHeight
+            )
+            
+            // Start-Position: Unter dem Bildschirm
+            // Start position: Below screen
+            let startFrame = NSRect(
+                x: finalFrame.minX,
+                y: finalFrame.minY - finalFrame.height,
+                width: finalFrame.width,
+                height: finalFrame.height
+            )
+            
+            window.setFrame(startFrame, display: false)
             window.alphaValue = 0
             window.makeKeyAndOrderFront(nil)
             
             NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.3
-                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                window.animator().alphaValue = 1.0
+                context.duration = 0.4
+                context.timingFunction = CAMediaTimingFunction(controlPoints: 0.25, 0.1, 0.25, 1)
+                window.animator().setFrame(finalFrame, display: true)
+                window.animator().alphaValue = settings.barOpacity
             } completionHandler: { [weak self] in
                 self?.isWindowVisible = true
+                self?.startHideTimer()
             }
         } else {
+            // Sofort anzeigen
+            // Show immediately
+            updateWindowFrame()
+            window.alphaValue = settings.barOpacity
             window.makeKeyAndOrderFront(nil)
             isWindowVisible = true
+            startHideTimer()
         }
-        
-        // App aktivieren
-        // Activate app
-        NSApp.activate(ignoringOtherApps: true)
     }
     
-    // Versteckt das Fenster mit Animation
-    // Hides window with animation
+    // Versteckt die Bottom Bar mit Slide-Down Animation
+    // Hides bottom bar with slide-down animation
     func hideWindow(animated: Bool = true) {
         guard let window = window else { return }
         
-        if animated {
+        hideTimer?.invalidate()
+        
+        if animated && isWindowVisible {
+            // Slide-down Animation
+            // Slide-down animation
+            let currentFrame = window.frame
+            let hideFrame = NSRect(
+                x: currentFrame.minX,
+                y: currentFrame.minY - currentFrame.height,
+                width: currentFrame.width,
+                height: currentFrame.height
+            )
+            
             NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.2
+                context.duration = 0.3
                 context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                window.animator().setFrame(hideFrame, display: true)
                 window.animator().alphaValue = 0
             } completionHandler: { [weak self] in
                 window.orderOut(nil)
@@ -143,27 +186,47 @@ class WindowManager: NSObject, ObservableObject {
         window?.contentView = view
     }
     
-    // Window-Position speichern/wiederherstellen
-    // Save/restore window position
-    func saveWindowPosition() {
-        guard let window = window else { return }
-        let frame = window.frame
-        UserDefaults.standard.set(NSStringFromRect(frame), forKey: "CopyPastaWindowFrame")
+    // Auto-Hide Timer starten
+    // Start auto-hide timer
+    private func startHideTimer() {
+        hideTimer?.invalidate()
+        hideTimer = Timer.scheduledTimer(withTimeInterval: settings.hideDelay, repeats: false) { [weak self] _ in
+            self?.hideWindow(animated: true)
+        }
     }
     
-    func restoreWindowPosition() {
-        guard let window = window,
-              let frameString = UserDefaults.standard.string(forKey: "CopyPastaWindowFrame"),
-              let screen = NSScreen.main else { return }
+    // Window-Frame basierend auf aktuellen Einstellungen aktualisieren
+    // Update window frame based on current settings
+    func updateWindowFrame() {
+        guard let window = window, let screen = NSScreen.main else { return }
         
-        let frame = NSRectFromString(frameString)
+        let screenFrame = screen.visibleFrame
+        let newFrame = NSRect(
+            x: screenFrame.minX,
+            y: screenFrame.minY,
+            width: screenFrame.width,
+            height: settings.barHeight
+        )
         
-        // Prüfen ob Frame noch auf sichtbarem Bildschirm ist
-        // Check if frame is still on visible screen
-        if screen.visibleFrame.intersects(frame) {
-            window.setFrame(frame, display: false)
+        if isWindowVisible {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.2
+                window.animator().setFrame(newFrame, display: true)
+            }
         } else {
-            window.center()
+            window.setFrame(newFrame, display: false)
+        }
+    }
+    
+    // Reagiert auf Maus-Events für Interaktivität
+    // Responds to mouse events for interactivity
+    func handleMouseEntered() {
+        hideTimer?.invalidate()
+    }
+    
+    func handleMouseExited() {
+        if isWindowVisible {
+            startHideTimer()
         }
     }
 }
@@ -172,7 +235,6 @@ class WindowManager: NSObject, ObservableObject {
 extension WindowManager: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         isWindowVisible = false
-        saveWindowPosition()
     }
     
     func windowDidBecomeKey(_ notification: Notification) {
