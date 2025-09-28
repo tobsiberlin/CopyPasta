@@ -11,6 +11,7 @@ struct MainContentView: View {
     @State private var hoveredItemID: UUID?
     @State private var showingPreview = false
     @State private var gridColumns = 4
+    @State private var previewItem: ClipboardItem?
     
     // Gefilterte Items basierend auf Suche
     // Filtered items based on search
@@ -60,6 +61,37 @@ struct MainContentView: View {
                 withAnimation(.spring()) {
                     hoveredItemID = firstItem.id
                 }
+            }
+        }
+        .sheet(isPresented: $showingPreview) {
+            if let previewItem = previewItem {
+                PreviewView(item: previewItem, isPresented: $showingPreview)
+            }
+        }
+        .onKeyboardShortcut(.return, modifiers: .command) {
+            // Cmd+Return: Paste selected item
+            if let selected = selectedItem {
+                copyItemToPasteboard(selected)
+            }
+        }
+        .onKeyboardShortcut(.delete) {
+            // Delete: Remove selected item
+            if let selected = selectedItem {
+                pasteboardWatcher.deleteItem(selected)
+                selectedItem = nil
+            }
+        }
+        .onKeyboardShortcut(.space) {
+            // Space: Preview selected item
+            if let selected = selectedItem {
+                previewItem = selected
+                showingPreview = true
+            }
+        }
+        .onKeyboardShortcut(KeyEquivalent("f"), modifiers: .command) {
+            // Cmd+F: Toggle favorite
+            if let selected = selectedItem {
+                pasteboardWatcher.toggleFavorite(selected)
             }
         }
     }
@@ -136,6 +168,10 @@ struct MainContentView: View {
                     )
                     .onTapGesture {
                         selectedItem = item
+                    }
+                    .onTapGesture(count: 2) {
+                        previewItem = item
+                        showingPreview = true
                     }
                     .onHover { isHovered in
                         withAnimation(.easeInOut(duration: 0.2)) {
