@@ -13,24 +13,24 @@ struct SettingsView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                headerSection
-                
-                ScrollView {
-                    VStack(spacing: 24) {
-                        themeSection
-                        appearanceSection
-                        behaviorSection
-                        advancedSection
-                        aboutSection
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 16)
+        VStack(spacing: 0) {
+            headerSection
+            
+            ScrollView {
+                VStack(spacing: 20) {
+                    themeSection
+                    appearanceSection  
+                    behaviorSection
+                    advancedSection
+                    aboutSection
                 }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
+            .background(Color(NSColor.controlBackgroundColor).opacity(0.3))
         }
         .frame(minWidth: 500, minHeight: 600)
+        .background(backgroundGradient)
         .preferredColorScheme(settings.themeMode == .system ? nil : 
                             (settings.themeMode == .light ? .light : .dark))
     }
@@ -273,21 +273,42 @@ struct SettingsSection<Content: View>: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundColor(.accentColor)
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(colors: [.accentColor, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 28, height: 28)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                }
                 
                 Text(title)
-                    .font(.headline)
+                    .font(.title3)
                     .fontWeight(.semibold)
+                    .foregroundColor(.primary)
             }
+            .padding(.leading, 4)
             
             VStack(spacing: 16) {
                 content
             }
-            .padding(16)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .padding(20)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.ultraThinMaterial)
+                    
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(LinearGradient(
+                            colors: [.white.opacity(0.2), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ), lineWidth: 1)
+                }
+            )
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
         }
     }
 }
@@ -319,22 +340,32 @@ struct SliderSetting: View {
     }
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             HStack {
                 Text(title)
                     .font(.subheadline)
+                    .fontWeight(.medium)
                     .foregroundColor(.primary)
                 
                 Spacer()
                 
                 Text(formattedValue)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.accentColor)
                     .monospacedDigit()
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
             }
             
             Slider(value: $value, in: range)
                 .accentColor(.accentColor)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.secondary.opacity(0.2))
+                        .frame(height: 6)
+                )
         }
     }
     
@@ -359,26 +390,29 @@ struct ToggleSetting: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.subheadline)
-                        .foregroundColor(.primary)
-                    
-                    if let description = description {
-                        Text(description)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                
+                if let description = description {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                
-                Spacer()
-                
-                Toggle("", isOn: $isOn)
-                    .labelsHidden()
             }
+            
+            Spacer()
+            
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .toggleStyle(SwitchToggleStyle(tint: .accentColor))
+                .scaleEffect(0.9)
         }
+        .padding(.vertical, 4)
     }
 }
 

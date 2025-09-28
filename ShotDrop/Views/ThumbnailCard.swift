@@ -64,5 +64,26 @@ struct ThumbnailCard: View {
         .shadow(color: isSelected ? .accentColor.opacity(0.3) : .clear, radius: 8)
         .animation(.easeInOut(duration: 0.2), value: isSelected)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
+        .draggable(item.imageData) {
+            // Drag Preview
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 60, height: 60)
+                
+                if let nsImage = NSImage(data: item.imageData) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 56, height: 56)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                } else {
+                    Image(systemName: "photo")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .opacity(0.8)
+        }
     }
 }

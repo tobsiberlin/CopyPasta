@@ -67,8 +67,9 @@ class WindowManager: ObservableObject {
         let contentView = ContentView()
             .environmentObject(AppSettings.shared)
         
+        let screenWidth = NSScreen.main?.visibleFrame.width ?? 1920
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 800, height: AppSettings.shared.barHeight),
+            contentRect: NSRect(x: 0, y: 0, width: screenWidth - 40, height: AppSettings.shared.barHeight),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -84,16 +85,23 @@ class WindowManager: ObservableObject {
     }
     
     private func positionWindow() {
-        guard let window = window, let screen = NSScreen.main else { return }
+        guard let window = window else { return }
         
+        // Immer den Hauptbildschirm verwenden (nicht screen where mouse is)
+        let screen = NSScreen.main ?? NSScreen.screens.first!
         let screenFrame = screen.visibleFrame
-        let windowWidth: CGFloat = min(800, screenFrame.width - 40)
+        let windowWidth: CGFloat = screenFrame.width - 40  // Fast die ganze Bildschirmbreite
         let windowHeight = AppSettings.shared.barHeight
         
         let x = screenFrame.midX - windowWidth / 2
         let y = screenFrame.minY + 20
         
         window.setFrame(NSRect(x: x, y: y, width: windowWidth, height: windowHeight), display: true)
+        
+        // Stelle sicher, dass das Fenster auf dem korrekten Bildschirm ist
+        if let windowScreen = window.screen, windowScreen != screen {
+            window.setFrame(NSRect(x: x, y: y, width: windowWidth, height: windowHeight), display: true)
+        }
     }
     
     func updateWindowFrame() {
@@ -106,6 +114,27 @@ class WindowManager: ObservableObject {
             y: currentFrame.origin.y,
             width: currentFrame.width,
             height: newHeight
+        )
+        
+        window.setFrame(newFrame, display: true, animate: true)
+    }
+    
+    func resizeWindowHorizontally(delta: CGFloat) {
+        guard let window = window, let screen = NSScreen.main else { return }
+        
+        let currentFrame = window.frame
+        let screenFrame = screen.visibleFrame
+        let minWidth: CGFloat = 400
+        let maxWidth: CGFloat = screenFrame.width - 40
+        
+        let newWidth = max(minWidth, min(maxWidth, currentFrame.width + delta))
+        let newX = screenFrame.midX - newWidth / 2  // Zentriert halten
+        
+        let newFrame = NSRect(
+            x: newX,
+            y: currentFrame.origin.y,
+            width: newWidth,
+            height: currentFrame.height
         )
         
         window.setFrame(newFrame, display: true, animate: true)

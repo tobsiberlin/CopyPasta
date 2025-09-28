@@ -161,24 +161,65 @@ struct BottomBarView: View {
     }
     
     private var resizeArea: some View {
-        Rectangle()
-            .fill(Color.clear)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
-                        settings.barHeight = newHeight
-                        windowManager.updateWindowFrame()
+        HStack(spacing: 0) {
+            // Links-Resize für Breite
+            Rectangle()
+                .fill(Color.clear)
+                .contentShape(Rectangle())
+                .frame(width: 20)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            windowManager.resizeWindowHorizontally(delta: -value.translation.width)
+                        }
+                )
+                .onHover { isHovered in
+                    if isHovered {
+                        NSCursor.resizeLeftRight.push()
+                    } else {
+                        NSCursor.pop()
                     }
-            )
-            .onHover { isHovered in
-                if isHovered {
-                    NSCursor.resizeUpDown.push()
-                } else {
-                    NSCursor.pop()
                 }
-            }
+            
+            // Mitte-Resize für Höhe
+            Rectangle()
+                .fill(Color.clear)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
+                            settings.barHeight = newHeight
+                            windowManager.updateWindowFrame()
+                        }
+                )
+                .onHover { isHovered in
+                    if isHovered {
+                        NSCursor.resizeUpDown.push()
+                    } else {
+                        NSCursor.pop()
+                    }
+                }
+            
+            // Rechts-Resize für Breite
+            Rectangle()
+                .fill(Color.clear)
+                .contentShape(Rectangle())
+                .frame(width: 20)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            windowManager.resizeWindowHorizontally(delta: value.translation.width)
+                        }
+                )
+                .onHover { isHovered in
+                    if isHovered {
+                        NSCursor.resizeLeftRight.push()
+                    } else {
+                        NSCursor.pop()
+                    }
+                }
+        }
     }
     
     private var mainContent: some View {
@@ -191,6 +232,9 @@ struct BottomBarView: View {
             } else {
                 itemScrollView
             }
+            
+            closeButton
+                .padding(.trailing, 16)
         }
     }
     
@@ -229,6 +273,59 @@ struct BottomBarView: View {
             withAnimation(.easeInOut(duration: 0.3)) {
                 if isHovered {
                     hoveredItemID = UUID(uuidString: "12345678-1234-1234-1234-123456789abc")
+                } else {
+                    hoveredItemID = nil
+                }
+            }
+        }
+    }
+    
+    private var closeButton: some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                windowManager.hideWindow()
+            }
+        }) {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(LinearGradient(
+                    colors: [.red, .orange],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                ))
+                .frame(width: 40, height: 40)
+                .background(
+                    ZStack {
+                        Circle()
+                            .fill(backgroundGradient)
+                            .opacity(0.8)
+                        
+                        Circle()
+                            .stroke(LinearGradient(
+                                colors: [.red.opacity(0.6), .orange.opacity(0.6)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ), lineWidth: 2)
+                            .opacity(0.8)
+                        
+                        Circle()
+                            .fill(LinearGradient(
+                                colors: [.red.opacity(0.1), .orange.opacity(0.1)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ))
+                            .scaleEffect(0.7)
+                    }
+                )
+                .scaleEffect(hoveredItemID?.uuidString == "close-button" ? 1.2 : 1.0)
+                .shadow(color: .red.opacity(0.4), radius: 8, x: 0, y: 4)
+        }
+        .buttonStyle(.plain)
+        .help("ShotDrop schließen")
+        .onHover { isHovered in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                if isHovered {
+                    hoveredItemID = UUID(uuidString: "12345678-1234-1234-1234-123456789def")
                 } else {
                     hoveredItemID = nil
                 }
