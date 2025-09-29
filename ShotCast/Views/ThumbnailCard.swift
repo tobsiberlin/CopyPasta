@@ -38,7 +38,7 @@ struct ThumbnailCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12) // Leicht abgerundet
-                .fill(.ultraThinMaterial)
+                .fill(Color(NSColor.controlBackgroundColor)) // Vollständig opak
                 .aspectRatio(1.0, contentMode: .fit) // Quadratisch
                 .overlay(
                     RoundedRectangle(cornerRadius: 12) // Leicht abgerundet

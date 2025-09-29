@@ -114,7 +114,50 @@ struct BottomBarView: View {
     
     var body: some View {
         ZStack {
-            // Resize handles at edges
+            // Main content with glass background
+            VStack(spacing: 0) {
+                // Top bar with controls
+                topControlBar
+                    .frame(height: 32)
+                
+                mainContent
+            }
+            .background(
+                glassBackground
+                    .cornerRadius(settings.cornerRadius)
+                    .shadow(color: Color.accentColor.opacity(0.2), radius: 30, x: 0, y: 10)
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
+                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+            )
+            .padding(.horizontal, 10) // Platz für horizontale Resize-Handles
+            .padding(.top, 10) // Platz für Top-Resize-Handle
+            
+            // Resize handles as overlay (always on top)
+            VStack(spacing: 0) {
+                // Top edge resize
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(height: 10)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
+                                settings.barHeight = newHeight
+                                windowManager.updateWindowFrame()
+                            }
+                    )
+                    .onHover { isHovered in
+                        if isHovered {
+                            NSCursor.resizeUpDown.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
+                
+                Spacer()
+            }
+            
             HStack(spacing: 0) {
                 // Left edge resize
                 Rectangle()
@@ -135,44 +178,7 @@ struct BottomBarView: View {
                         }
                     }
                 
-                VStack(spacing: 0) {
-                    // Top edge resize
-                    Rectangle()
-                        .fill(Color.clear)
-                        .frame(height: 10)
-                        .contentShape(Rectangle())
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
-                                    settings.barHeight = newHeight
-                                    windowManager.updateWindowFrame()
-                                }
-                        )
-                        .onHover { isHovered in
-                            if isHovered {
-                                NSCursor.resizeUpDown.push()
-                            } else {
-                                NSCursor.pop()
-                            }
-                        }
-                    
-                    // Main content
-                    VStack(spacing: 0) {
-                        // Top bar with controls
-                        topControlBar
-                            .frame(height: 32)
-                        
-                        mainContent
-                    }
-                    .background(
-                        glassBackground
-                            .cornerRadius(settings.cornerRadius)
-                            .shadow(color: Color.accentColor.opacity(0.2), radius: 30, x: 0, y: 10)
-                            .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
-                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    )
-                }
+                Spacer()
                 
                 // Right edge resize
                 Rectangle()

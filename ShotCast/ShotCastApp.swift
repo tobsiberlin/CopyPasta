@@ -54,7 +54,17 @@ struct StatusBarIconView: View {
             return templateIcon
         }
         
-        // Create professional ShotCast icon programmatically
+        // Use the actual app icon for menubar - resize it appropriately
+        if let appIcon = NSImage(named: "AppIcon") {
+            let menuBarIcon = NSImage(size: NSSize(width: 16, height: 16))
+            menuBarIcon.lockFocus()
+            appIcon.draw(in: NSRect(origin: .zero, size: NSSize(width: 16, height: 16)))
+            menuBarIcon.unlockFocus()
+            menuBarIcon.isTemplate = true
+            return menuBarIcon
+        }
+        
+        // Fallback to programmatic icon
         return createProgrammaticMenuBarIcon()
     }
     
@@ -85,28 +95,46 @@ struct StatusBarIconView: View {
         
         context.setFillColor(NSColor.black.cgColor)
         
-        // Create sleek icon design - resembling a screenshot/frame
+        // Create camera/screenshot icon for ShotCast
         let path = NSBezierPath()
         
-        // Outer frame (like screenshot border)
-        path.appendRect(NSRect(x: 1, y: 1, width: 14, height: 10))
-        path.lineWidth = 1.5
+        // Camera body (main rectangle)
+        let bodyRect = NSRect(x: 2, y: 4, width: 12, height: 8)
+        path.appendRoundedRect(bodyRect, xRadius: 1, yRadius: 1)
+        path.lineWidth = 1.2
         path.stroke()
         
-        // Inner elements (like content indicators)
-        let dotSize: CGFloat = 1.5
-        context.fillEllipse(in: NSRect(x: 3, y: 8, width: dotSize, height: dotSize))
-        context.fillEllipse(in: NSRect(x: 6, y: 8, width: dotSize, height: dotSize))
-        context.fillEllipse(in: NSRect(x: 9, y: 8, width: dotSize, height: dotSize))
+        // Camera lens (circle in center)
+        let lensCenter = NSPoint(x: 8, y: 8)
+        let lensRadius: CGFloat = 2.5
+        context.strokeEllipse(in: NSRect(
+            x: lensCenter.x - lensRadius/2,
+            y: lensCenter.y - lensRadius/2, 
+            width: lensRadius,
+            height: lensRadius
+        ))
         
-        // Small "S" for ShotCast
-        let font = NSFont.systemFont(ofSize: 6, weight: .medium)
+        // Inner lens circle
+        let innerRadius: CGFloat = 1.2
+        context.fillEllipse(in: NSRect(
+            x: lensCenter.x - innerRadius/2,
+            y: lensCenter.y - innerRadius/2,
+            width: innerRadius,
+            height: innerRadius
+        ))
+        
+        // Camera flash/viewfinder (small rectangle on top)
+        let flashRect = NSRect(x: 6, y: 11.5, width: 4, height: 1.5)
+        context.fill(flashRect)
+        
+        // Small "SC" for ShotCast in corner
+        let font = NSFont.systemFont(ofSize: 4.5, weight: .bold)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: NSColor.black
         ]
-        let sString = NSAttributedString(string: "S", attributes: attributes)
-        sString.draw(at: NSPoint(x: 11.5, y: 3))
+        let scString = NSAttributedString(string: "SC", attributes: attributes)
+        scString.draw(at: NSPoint(x: 11, y: 5))
         
         image.unlockFocus()
         
