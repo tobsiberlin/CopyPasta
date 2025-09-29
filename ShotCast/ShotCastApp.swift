@@ -55,7 +55,7 @@ struct StatusBarIconView: View {
         }
         
         // Create professional ShotCast icon programmatically
-        return IconGenerator.shared.createMenuBarTemplateIcon()
+        return createProgrammaticMenuBarIcon()
     }
     
     private func createSFSymbolMenuBarIcon() -> NSImage? {
@@ -69,6 +69,54 @@ struct StatusBarIconView: View {
         }
         
         return nil
+    }
+    
+    private func createProgrammaticMenuBarIcon() -> NSImage? {
+        let size = NSSize(width: 16, height: 16)
+        let image = NSImage(size: size)
+        
+        image.lockFocus()
+        
+        // Create professional icon design
+        let rect = NSRect(origin: .zero, size: size)
+        
+        // Set up graphics context
+        guard let context = NSGraphicsContext.current?.cgContext else {
+            image.unlockFocus()
+            return nil
+        }
+        
+        context.setFillColor(NSColor.black.cgColor)
+        
+        // Create sleek icon design - resembling a screenshot/frame
+        let path = NSBezierPath()
+        
+        // Outer frame (like screenshot border)
+        path.appendRect(NSRect(x: 1, y: 1, width: 14, height: 10))
+        path.lineWidth = 1.5
+        path.stroke()
+        
+        // Inner elements (like content indicators)
+        let dotSize: CGFloat = 1.5
+        context.fillEllipse(in: NSRect(x: 3, y: 8, width: dotSize, height: dotSize))
+        context.fillEllipse(in: NSRect(x: 6, y: 8, width: dotSize, height: dotSize))
+        context.fillEllipse(in: NSRect(x: 9, y: 8, width: dotSize, height: dotSize))
+        
+        // Small "S" for ShotCast
+        let font = NSFont.systemFont(ofSize: 6, weight: .medium)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.black
+        ]
+        let sString = NSAttributedString(string: "S", attributes: attributes)
+        sString.draw(at: NSPoint(x: 11.5, y: 3))
+        
+        image.unlockFocus()
+        
+        // Make it a template image for automatic theme adaptation
+        image.isTemplate = true
+        
+        return image
     }
 }
 

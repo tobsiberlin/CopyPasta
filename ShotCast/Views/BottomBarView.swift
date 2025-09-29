@@ -586,7 +586,7 @@ struct BottomBarView: View {
                     if result == .OK, let url = savePanel.url, let imageData = item.imageData {
                         do {
                             try imageData.write(to: url)
-                            self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                            self.toastMessage = self.localizationManager.localizedString(.copied)
                             self.showingToast = true
                         } catch {
                             print("Error saving image: \(error)")
@@ -601,7 +601,7 @@ struct BottomBarView: View {
                     if result == .OK, let url = savePanel.url, let textContent = item.textContent {
                         do {
                             try textContent.write(to: url, atomically: true, encoding: .utf8)
-                            self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                            self.toastMessage = self.localizationManager.localizedString(.copied)
                             self.showingToast = true
                         } catch {
                             print("Error saving text: \(error)")
@@ -612,35 +612,17 @@ struct BottomBarView: View {
                 // Handle other file types (like files copied to clipboard)
                 if let data = item.fileData {
                     savePanel.allowedContentTypes = [item.contentType]
-                    let extension = item.contentType.preferredFilenameExtension ?? "file"
-                    savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970)).\(extension)"
+                    let fileExtension = item.contentType.preferredFilenameExtension ?? "file"
+                    savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970)).\(fileExtension)"
                     
                     savePanel.begin { result in
                         if result == .OK, let url = savePanel.url {
                             do {
                                 try data.write(to: url)
-                                self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                                self.toastMessage = self.localizationManager.localizedString(.copied)
                                 self.showingToast = true
                             } catch {
                                 print("Error saving file: \(error)")
-                            }
-                        }
-                    }
-                } else if let filePath = item.filePath {
-                    // If we have a file path, copy the file
-                    savePanel.allowedContentTypes = [item.contentType]
-                    let extension = item.contentType.preferredFilenameExtension ?? "file"
-                    savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970)).\(extension)"
-                    
-                    savePanel.begin { result in
-                        if result == .OK, let destinationURL = savePanel.url {
-                            do {
-                                let sourceURL = URL(fileURLWithPath: filePath)
-                                try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
-                                self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
-                                self.showingToast = true
-                            } catch {
-                                print("Error copying file: \(error)")
                             }
                         }
                     }
