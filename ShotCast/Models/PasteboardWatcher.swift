@@ -11,6 +11,9 @@ class PasteboardWatcher: ObservableObject {
     private var timer: Timer?
     private var lastChangeCount: Int = 0
     private let pasteboard = NSPasteboard.general
+    private let dataManager = ReliableDataManager.shared
+    private let processingQueue = DispatchQueue(label: "com.shotcast.pasteboard", qos: .userInitiated)
+    private let maxRetries = 3
     
     private init() {
         loadSavedItems()
@@ -32,26 +35,56 @@ class PasteboardWatcher: ObservableObject {
     }
     
     private func checkForChanges() {
-        let currentChangeCount = pasteboard.changeCount
+        // Robust change detection with retry logic
+        var currentChangeCount: Int = 0
+        var retryCount = 0
+        
+        repeat {
+            currentChangeCount = pasteboard.changeCount
+            retryCount += 1
+            
+            // If changeCount is unreliable, wait and retry
+            if retryCount > 1 {
+                Thread.sleep(forTimeInterval: 0.05 * Double(retryCount))
+            }
+            
+        } while retryCount <= maxRetries && currentChangeCount < 0
         
         if currentChangeCount != lastChangeCount {
             lastChangeCount = currentChangeCount
-            handlePasteboardChange()
+            
+            // Process on background queue to avoid blocking UI
+            processingQueue.async { [weak self] in
+                self?.handlePasteboardChangeReliably()
+            }
         }
     }
     
-    private func handlePasteboardChange() {
-        guard let items = pasteboard.pasteboardItems else { return }
+    private func handlePasteboardChangeReliably() {
+        // Robust pasteboard item extraction with retries
+        var items: [NSPasteboardItem]?
+        var retryCount = 0
         
-        for item in items {
+        repeat {
+            items = pasteboard.pasteboardItems
+            if items != nil { break }
+            
+            retryCount += 1
+            if retryCount <= maxRetries {
+                Thread.sleep(forTimeInterval: 0.1 * Double(retryCount))
+            }
+        } while retryCount <= maxRetries
+        
+        guard let pasteboardItems = items, !pasteboardItems.isEmpty else {
+            print("❌ No pasteboard items found after \(maxRetries) retries")
+            return
+        }
+        
+        for item in pasteboardItems {
             var newItem: ClipboardItem? = nil
             
-            // 1. Prüfe auf Bilder (höchste Priorität)
-            if let imageData = item.data(forType: .png) ?? 
-                               item.data(forType: NSPasteboard.PasteboardType("public.jpeg")) ?? 
-                               item.data(forType: .tiff) ?? 
-                               item.data(forType: NSPasteboard.PasteboardType("public.heic")) ?? 
-                               item.data(forType: NSPasteboard.PasteboardType("public.webp")) {
+            // 1. Prüfe auf Bilder mit Datenvalidierung
+            if let imageData = extractImageDataReliably(from: item) {
                 
                 let contentType: UTType
                 if item.data(forType: .png) != nil {
@@ -185,7 +218,7 @@ class PasteboardWatcher: ObservableObject {
                 
                 self.saveItems()
                 let itemType = self.getItemTypeDescription(item)
-                print("📋 Neues \(itemType) hinzugefügt. Gesamt: \(self.clipboardItems.count)")
+                print("📋 New \(itemType) added. Total: \(self.clipboardItems.count)")
             }
         }
     }
@@ -237,16 +270,94 @@ class PasteboardWatcher: ObservableObject {
     }
     
     private func saveItems() {
-        if let encoded = try? JSONEncoder().encode(clipboardItems) {
-            UserDefaults.standard.set(encoded, forKey: "clipboardItems")
+        // Use ReliableDataManager for robust saving
+        let result = dataManager.saveReliably(clipboardItems, forKey: "clipboardItems", withBackup: true)
+        switch result {
+        case .success():
+            print("✅ Saved \(clipboardItems.count) clipboard items reliably")
+        case .failure(let error):
+            print("❌ Failed to save clipboard items: \(error.localizedDescription)")
+            // Fallback to UserDefaults
+            if let encoded = try? JSONEncoder().encode(clipboardItems) {
+                UserDefaults.standard.set(encoded, forKey: "clipboardItems")
+                print("⚠️ Used UserDefaults fallback")
+            }
         }
     }
     
     private func loadSavedItems() {
-        if let data = UserDefaults.standard.data(forKey: "clipboardItems"),
-           let items = try? JSONDecoder().decode([ClipboardItem].self, from: data) {
-            self.clipboardItems = items
-            print("📋 \(items.count) gespeicherte Items geladen")
+        // Use ReliableDataManager for robust loading
+        switch dataManager.loadReliably([ClipboardItem].self, forKey: "clipboardItems") {
+        case .success(let savedItems):
+            self.clipboardItems = savedItems ?? []
+            print("✅ Loaded \(self.clipboardItems.count) clipboard items reliably")
+        case .failure(let error):
+            print("❌ Failed to load clipboard items: \(error.localizedDescription)")
+            self.clipboardItems = []
+        }
+    }
+    
+    // MARK: - Robust Data Extraction Methods
+    
+    private func extractImageDataReliably(from item: NSPasteboardItem) -> Data? {
+        let imageTypes: [NSPasteboard.PasteboardType] = [
+            .png,
+            NSPasteboard.PasteboardType("public.jpeg"),
+            .tiff,
+            NSPasteboard.PasteboardType("public.heic"),
+            NSPasteboard.PasteboardType("public.webp")
+        ]
+        
+        for imageType in imageTypes {
+            if let data = extractDataWithValidation(from: item, type: imageType, minSize: 100) {
+                // Validate that it's actually image data
+                if NSImage(data: data) != nil {
+                    return data
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    private func extractDataWithValidation(from item: NSPasteboardItem, type: NSPasteboard.PasteboardType, minSize: Int = 0) -> Data? {
+        var data: Data?
+        var retryCount = 0
+        
+        repeat {
+            data = item.data(forType: type)
+            if let extractedData = data {
+                // Validate data size
+                if extractedData.count >= minSize {
+                    // Additional validation for specific types
+                    if validateDataIntegrity(extractedData, for: type) {
+                        return extractedData
+                    }
+                }
+            }
+            
+            retryCount += 1
+            if retryCount <= maxRetries {
+                Thread.sleep(forTimeInterval: 0.05 * Double(retryCount))
+            }
+            
+        } while retryCount <= maxRetries
+        
+        return nil
+    }
+    
+    private func validateDataIntegrity(_ data: Data, for type: NSPasteboard.PasteboardType) -> Bool {
+        // Basic validation based on data type
+        switch type.rawValue {
+        case "public.png":
+            return data.starts(with: [0x89, 0x50, 0x4E, 0x47]) // PNG signature
+        case "public.jpeg":
+            return data.starts(with: [0xFF, 0xD8, 0xFF]) // JPEG signature
+        case "public.tiff":
+            return data.starts(with: [0x49, 0x49, 0x2A, 0x00]) || 
+                   data.starts(with: [0x4D, 0x4D, 0x00, 0x2A]) // TIFF signatures
+        default:
+            return data.count > 0 // Basic non-empty check
         }
     }
 }

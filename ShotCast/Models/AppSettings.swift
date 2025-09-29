@@ -51,10 +51,11 @@ class AppSettings: ObservableObject {
         case dark = "dark"
         
         var displayName: String {
+            let locManager = LocalizationManager.shared
             switch self {
-            case .system: return "System"
-            case .light: return "Hell"
-            case .dark: return "Dunkel"
+            case .system: return locManager.localizedString(.themeSystem)
+            case .light: return locManager.localizedString(.themeLight)
+            case .dark: return locManager.localizedString(.themeDark)
             }
         }
         
@@ -73,10 +74,11 @@ class AppSettings: ObservableObject {
         case unlimited = -1
         
         var displayName: String {
+            let locManager = LocalizationManager.shared
             switch self {
-            case .ten: return "Letzte 10 Shots"
-            case .hundred: return "Letzte 100 Shots"
-            case .unlimited: return "Unbegrenzt"
+            case .ten: return locManager.localizedString(.itemLimitTen)
+            case .hundred: return locManager.localizedString(.itemLimitHundred)
+            case .unlimited: return locManager.localizedString(.itemLimitUnlimited)
             }
         }
     }

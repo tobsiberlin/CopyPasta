@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5FF1B4AD2E8A95BC00D84A65 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */; };
+		5FF1B4B12E8A971500D84A65 /* ModernSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */; };
+		5FF1B4B32E8A99A700D84A65 /* DragManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B22E8A99A700D84A65 /* DragManager.swift */; };
+		5FF1B4B62E8A9DB800D84A65 /* SourceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B52E8A9DB800D84A65 /* SourceDetector.swift */; };
+		5FF1B4B72E8A9DB800D84A65 /* OCRManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B42E8A9DB800D84A65 /* OCRManager.swift */; };
+		5FF1B4B92E8A9FFE00D84A65 /* WindowSnappingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B82E8A9FFE00D84A65 /* WindowSnappingManager.swift */; };
 		A1234567890ABCDEF001 /* ShotCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF002 /* ShotCastApp.swift */; };
 		A1234567890ABCDEF003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF004 /* ContentView.swift */; };
 		A1234567890ABCDEF005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF006 /* Assets.xcassets */; };
@@ -23,7 +29,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1234567890ABCDEF020 /* ShotCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShotCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
+		5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernSettingsView.swift; sourceTree = "<group>"; };
+		5FF1B4B22E8A99A700D84A65 /* DragManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragManager.swift; sourceTree = "<group>"; };
+		5FF1B4B42E8A9DB800D84A65 /* OCRManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRManager.swift; sourceTree = "<group>"; };
+		5FF1B4B52E8A9DB800D84A65 /* SourceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDetector.swift; sourceTree = "<group>"; };
+		5FF1B4B82E8A9FFE00D84A65 /* WindowSnappingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowSnappingManager.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF002 /* ShotCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotCastApp.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -38,6 +49,7 @@
 		A1234567890ABCDEF018 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF01A /* ClipboardItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardItem.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF01B /* ShotCast.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShotCast.entitlements; sourceTree = "<group>"; };
+		A1234567890ABCDEF020 /* ShotCast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShotCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,25 +63,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5FF1B4AB2E8A958700D84A65 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */,
+			);
+			path = Localization;
+			sourceTree = "<group>";
+		};
 		A1234567890ABCDEF022 = {
 			isa = PBXGroup;
 			children = (
+				5FF1B4AB2E8A958700D84A65 /* Localization */,
 				A1234567890ABCDEF023 /* ShotCast */,
 				A1234567890ABCDEF024 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A1234567890ABCDEF024 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A1234567890ABCDEF020 /* ShotCast.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		A1234567890ABCDEF023 /* ShotCast */ = {
 			isa = PBXGroup;
 			children = (
+				5FF1B4B82E8A9FFE00D84A65 /* WindowSnappingManager.swift */,
+				5FF1B4B42E8A9DB800D84A65 /* OCRManager.swift */,
+				5FF1B4B52E8A9DB800D84A65 /* SourceDetector.swift */,
+				5FF1B4B22E8A99A700D84A65 /* DragManager.swift */,
 				A1234567890ABCDEF002 /* ShotCastApp.swift */,
 				A1234567890ABCDEF004 /* ContentView.swift */,
 				A1234567890ABCDEF025 /* Views */,
@@ -82,17 +99,18 @@
 			path = ShotCast;
 			sourceTree = "<group>";
 		};
-		A1234567890ABCDEF028 /* Preview Content */ = {
+		A1234567890ABCDEF024 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A1234567890ABCDEF008 /* Preview Assets.xcassets */,
+				A1234567890ABCDEF020 /* ShotCast.app */,
 			);
-			path = "Preview Content";
+			name = Products;
 			sourceTree = "<group>";
 		};
 		A1234567890ABCDEF025 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */,
 				A1234567890ABCDEF00E /* BottomBarView.swift */,
 				A1234567890ABCDEF010 /* ThumbnailCard.swift */,
 				A1234567890ABCDEF014 /* SettingsView.swift */,
@@ -118,6 +136,14 @@
 				A1234567890ABCDEF029 /* Extensions */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		A1234567890ABCDEF028 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				A1234567890ABCDEF008 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		A1234567890ABCDEF029 /* Extensions */ = {
@@ -199,15 +225,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1234567890ABCDEF003 /* ContentView.swift in Sources */,
+				5FF1B4B32E8A99A700D84A65 /* DragManager.swift in Sources */,
 				A1234567890ABCDEF001 /* ShotCastApp.swift in Sources */,
 				A1234567890ABCDEF009 /* PasteboardWatcher.swift in Sources */,
 				A1234567890ABCDEF00B /* WindowManager.swift in Sources */,
+				5FF1B4AD2E8A95BC00D84A65 /* LocalizationManager.swift in Sources */,
 				A1234567890ABCDEF00D /* BottomBarView.swift in Sources */,
 				A1234567890ABCDEF00F /* ThumbnailCard.swift in Sources */,
 				A1234567890ABCDEF011 /* AppSettings.swift in Sources */,
 				A1234567890ABCDEF013 /* SettingsView.swift in Sources */,
+				5FF1B4B12E8A971500D84A65 /* ModernSettingsView.swift in Sources */,
 				A1234567890ABCDEF015 /* SettingsWindowManager.swift in Sources */,
+				5FF1B4B92E8A9FFE00D84A65 /* WindowSnappingManager.swift in Sources */,
 				A1234567890ABCDEF017 /* ViewExtensions.swift in Sources */,
+				5FF1B4B62E8A9DB800D84A65 /* SourceDetector.swift in Sources */,
+				5FF1B4B72E8A9DB800D84A65 /* OCRManager.swift in Sources */,
 				A1234567890ABCDEF019 /* ClipboardItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -386,20 +418,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A1234567890ABCDEF035 /* Build configuration list for PBXProject "ShotCast" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A1234567890ABCDEF036 /* Debug */,
-				A1234567890ABCDEF037 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		A1234567890ABCDEF031 /* Build configuration list for PBXNativeTarget "ShotCast" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A1234567890ABCDEF038 /* Debug */,
 				A1234567890ABCDEF039 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1234567890ABCDEF035 /* Build configuration list for PBXProject "ShotCast" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1234567890ABCDEF036 /* Debug */,
+				A1234567890ABCDEF037 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

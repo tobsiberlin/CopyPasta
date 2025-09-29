@@ -16,6 +16,7 @@ class WindowManager: ObservableObject {
     
     private var isDragging = false
     private var dragStartPoint: NSPoint = .zero
+    private let snappingManager = WindowSnappingManager.shared
     
     private init() {}
     
@@ -171,6 +172,28 @@ class WindowManager: ObservableObject {
         scheduleAutoHide()
     }
     
+    // MARK: - Professional Window Management
+    
+    func handleKeyboardShortcut(_ event: NSEvent) -> Bool {
+        guard let window = window else { return false }
+        return snappingManager.handleKeyboardShortcut(event, window: window)
+    }
+    
+    func centerWindow() {
+        guard let window = window else { return }
+        snappingManager.centerWindow(window)
+    }
+    
+    func snapToZone(_ zone: WindowSnappingManager.SnapZone) {
+        guard let window = window else { return }
+        snappingManager.snapWindow(window, to: zone, animated: true)
+    }
+    
+    func moveToScreen(_ screen: NSScreen) {
+        guard let window = window else { return }
+        snappingManager.moveWindow(window, to: screen, maintainRelativePosition: true)
+    }
+    
     // MARK: - Window Dragging & Snapping
     
     func startDragging(at point: NSPoint) {
@@ -179,10 +202,19 @@ class WindowManager: ObservableObject {
     }
     
     func endDragging() {
-        if isDragging {
-            isDragging = false
+        guard isDragging, let window = window else { return }
+        isDragging = false
+        
+        // Professional multi-screen snapping
+        let mouseLocation = NSEvent.mouseLocation
+        if let snapZone = snappingManager.detectSnapZone(for: window, mouseLocation: mouseLocation) {
+            snappingManager.snapWindow(window, to: snapZone, animated: true)
+        } else {
+            // Fallback to old snapping for compatibility
             snapToNearestEdge()
         }
+        
+        snappingManager.hideSnapPreview()
     }
     
     func updateDragPosition(delta: NSPoint) {
@@ -197,6 +229,16 @@ class WindowManager: ObservableObject {
         )
         
         window.setFrame(newFrame, display: true, animate: false)
+        
+        // Show snap preview during dragging
+        let mouseLocation = NSEvent.mouseLocation
+        if let snapZone = snappingManager.detectSnapZone(for: window, mouseLocation: mouseLocation) {
+            if let screen = window.screen {
+                snappingManager.showSnapPreview(for: snapZone, on: screen)
+            }
+        } else {
+            snappingManager.hideSnapPreview()
+        }
     }
     
     private func snapToNearestEdge() {

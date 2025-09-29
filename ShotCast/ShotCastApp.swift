@@ -8,30 +8,83 @@ struct ShotCastApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        MenuBarExtra("ShotCast", systemImage: "viewfinder.rectangular") {
+        MenuBarExtra {
             MenuBarView()
+        } label: {
+            StatusBarIconView()
         }
         .menuBarExtraStyle(.window)
     }
 }
 
+// MARK: - Professional StatusBar Icon
+struct StatusBarIconView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Group {
+            // Try to load professional menubar icon first
+            if let menuBarIcon = createMenuBarIcon() {
+                Image(nsImage: menuBarIcon)
+            } else if let appIcon = NSImage(named: "AppIcon") {
+                // Fallback: use app icon with proper sizing
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 16, height: 16) // Standard menubar size
+            } else {
+                // Final fallback: SF Symbol
+                Image(systemName: "photo.artframe")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.primary)
+            }
+        }
+    }
+    
+    private func createMenuBarIcon() -> NSImage? {
+        // Try to load menubar-specific template icon
+        if let templateIcon = NSImage(named: "MenuBarIcon") {
+            templateIcon.isTemplate = true
+            return templateIcon
+        }
+        
+        // Try to load menubar icon with Template suffix (macOS convention)
+        if let templateIcon = NSImage(named: "MenuBarIconTemplate") {
+            templateIcon.isTemplate = true
+            return templateIcon
+        }
+        
+        // Create professional icon from SF Symbol
+        return createSFSymbolMenuBarIcon()
+    }
+    
+    private func createSFSymbolMenuBarIcon() -> NSImage? {
+        // Create professional SF Symbol icon
+        let image = NSImage(systemSymbolName: "photo.artframe", accessibilityDescription: "ShotCast")
+        image?.isTemplate = true
+        return image
+    }
+}
+
 struct MenuBarView: View {
+    @StateObject private var localizationManager = LocalizationManager.shared
+    
     var body: some View {
         VStack {
-            Button("ShotCast öffnen") {
+            Button(localizationManager.localizedString(.menuOpen)) {
                 WindowManager.shared.showWindow()
                 NSApp.activate(ignoringOtherApps: true)
             }
             
             Divider()
             
-            Button("Einstellungen...") {
+            Button(localizationManager.localizedString(.menuSettings)) {
                 SettingsWindowManager.shared.showSettingsWindow()
             }
             
             Divider()
             
-            Button("Beenden") {
+            Button(localizationManager.localizedString(.menuQuit)) {
                 NSApplication.shared.terminate(nil)
             }
         }

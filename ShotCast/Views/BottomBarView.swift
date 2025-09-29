@@ -6,6 +6,7 @@ struct BottomBarView: View {
     @StateObject private var pasteboardWatcher = PasteboardWatcher.shared
     @StateObject private var windowManager = WindowManager.shared
     @StateObject private var settings = AppSettings.shared
+    @StateObject private var localizationManager = LocalizationManager.shared
     @Environment(\.colorScheme) var colorScheme
     
     @State private var selectedItem: ClipboardItem?
@@ -21,47 +22,34 @@ struct BottomBarView: View {
         return Array(items.prefix(settings.maxItems))
     }
     
-    private var backgroundGradient: LinearGradient {
-        switch settings.themeMode {
-        case .light:
-            return LinearGradient(
+    private var glassBackground: some View {
+        ZStack {
+            // Base blur layer
+            VisualEffectView(material: .popover, blendingMode: .behindWindow)
+                .opacity(0.8)
+            
+            // Subtle gradient overlay
+            LinearGradient(
                 gradient: Gradient(colors: [
-                    Color.white.opacity(0.98),
-                    Color(red: 0.98, green: 0.99, blue: 1.0).opacity(0.95),
-                    Color(red: 0.96, green: 0.98, blue: 1.0).opacity(0.9)
+                    Color.primary.opacity(0.02),
+                    Color.primary.opacity(0.05)
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-        case .dark:
-            return LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.black.opacity(0.9),
-                    Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.9),
-                    Color.blue.opacity(0.4)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .system:
-            return colorScheme == .dark ? 
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.black.opacity(0.9),
-                        Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.9),
-                        Color.blue.opacity(0.4)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ) :
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.white.opacity(0.98),
-                        Color(red: 0.98, green: 0.99, blue: 1.0).opacity(0.95),
-                        Color(red: 0.96, green: 0.98, blue: 1.0).opacity(0.9)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+            
+            // Border highlight
+            RoundedRectangle(cornerRadius: settings.cornerRadius)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.primary.opacity(0.15),
+                            Color.primary.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
                 )
         }
     }
@@ -114,36 +102,20 @@ struct BottomBarView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
+                // Top bar with controls
+                topControlBar
+                    .frame(height: 32)
+                
                 resizeArea
                     .frame(height: 8)
                 
                 mainContent
             }
             .background(
-                ZStack {
-                    backgroundGradient
-                    
-                    VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
-                        .opacity(0.4)
-                    
-                    VStack {
-                        Rectangle()
-                            .fill(accentGradient)
-                            .frame(height: 3)
-                            .shadow(color: .accentColor.opacity(0.5), radius: 4, x: 0, y: 2)
-                        Spacer()
-                    }
-                    
-                    particleOverlay
-                }
-                .cornerRadius(settings.cornerRadius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: settings.cornerRadius)
-                        .stroke(accentGradient, lineWidth: 1.5)
-                        .opacity(0.6)
-                )
-                .shadow(color: .accentColor.opacity(0.3), radius: 20, x: 0, y: 10)
-                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                glassBackground
+                    .cornerRadius(settings.cornerRadius)
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
+                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
             )
             
             // Toast Overlay
@@ -163,7 +135,7 @@ struct BottomBarView: View {
                             )
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Kopiert!")
+                            Text(localizationManager.localizedString(.copied))
                                 .font(.headline)
                                 .foregroundColor(.primary)
                             
@@ -318,13 +290,25 @@ struct BottomBarView: View {
         }
     }
     
+    private var topControlBar: some View {
+        HStack {
+            // Settings button in top left
+            settingsButton
+                .padding(.leading, 12)
+            
+            Spacer()
+            
+            // Close button in top right
+            closeButton
+                .padding(.trailing, 12)
+        }
+        .padding(.vertical, 4)
+    }
+    
     private var mainContent: some View {
         HStack(spacing: 0) {
-            HStack(spacing: 8) {
-                resizeIndicator
-                settingsButton
-            }
-            .padding(.leading, 12)
+            resizeIndicator
+                .padding(.leading, 12)
             
             // Center content with drag handle
             ZStack {
@@ -342,8 +326,8 @@ struct BottomBarView: View {
                 }
             }
             
-            closeButton
-                .padding(.trailing, 12)
+            Spacer()
+                .frame(width: 12)
         }
     }
     
@@ -376,7 +360,7 @@ struct BottomBarView: View {
                 .opacity(hoveredItemID?.uuidString == "settings-button" ? 0.8 : 0.6)
         }
         .buttonStyle(.plain)
-        .help("ShotCast Einstellungen")
+        .help(localizationManager.localizedString(.helpSettings))
         .onHover { isHovered in
             withAnimation(.easeInOut(duration: 0.3)) {
                 if isHovered {
@@ -407,7 +391,7 @@ struct BottomBarView: View {
                 .opacity(hoveredItemID?.uuidString == "close-button" ? 0.8 : 0.5)
         }
         .buttonStyle(.plain)
-        .help("ShotCast schließen")
+        .help(localizationManager.localizedString(.helpClose))
         .onHover { isHovered in
             withAnimation(.easeInOut(duration: 0.3)) {
                 if isHovered {
@@ -470,7 +454,7 @@ struct BottomBarView: View {
                 .font(.system(size: 24, weight: .light))
                 .foregroundColor(.secondary.opacity(0.6))
             
-            Text("Keine Inhalte im Clipboard")
+            Text(localizationManager.localizedString(.emptyClipboard))
                 .font(.caption)
                 .foregroundColor(.secondary.opacity(0.8))
         }
@@ -479,23 +463,23 @@ struct BottomBarView: View {
     
     private func itemContextMenu(for item: ClipboardItem) -> some View {
         Group {
-            Button("Kopieren") {
+            Button(localizationManager.localizedString(.contextCopy)) {
                 copyItemToPasteboard(item)
             }
             
-            Button(item.isFavorite ? "Aus Favoriten" : "Zu Favoriten") {
+            Button(item.isFavorite ? localizationManager.localizedString(.contextUnfavorite) : localizationManager.localizedString(.contextFavorite)) {
                 pasteboardWatcher.toggleFavorite(item)
             }
             
             Divider()
             
-            Button("Als Datei speichern...") {
+            Button(localizationManager.localizedString(.contextSaveAsFile)) {
                 saveItemToFile(item)
             }
             
             Divider()
             
-            Button("Löschen") {
+            Button(localizationManager.localizedString(.contextDelete)) {
                 pasteboardWatcher.deleteItem(item)
             }
         }
@@ -510,7 +494,7 @@ struct BottomBarView: View {
         } else if let textContent = item.textContent {
             pasteboard.setString(textContent, forType: .string)
             // Zeige Toast für Text
-            toastMessage = "Text wurde in die Zwischenablage kopiert und kann jetzt in Tools eingefügt werden"
+            toastMessage = localizationManager.localizedString(.copyText)
             showingToast = true
         }
         
@@ -559,7 +543,7 @@ struct BottomBarView: View {
                     try? FileManager.default.removeItem(at: tempURL)
                 }
             } catch {
-                print("Fehler beim Öffnen des Bildes: \(error)")
+                print("Error opening image: \(error)")
             }
         } else if item.isText, let textContent = item.textContent {
             // Öffne Text in TextEdit
@@ -574,14 +558,14 @@ struct BottomBarView: View {
                     try? FileManager.default.removeItem(at: tempURL)
                 }
             } catch {
-                print("Fehler beim Öffnen des Textes: \(error)")
+                print("Error opening text: \(error)")
             }
         }
     }
     
     private func showOCRToast(with text: String) {
         withAnimation(.easeInOut(duration: 0.3)) {
-            toastMessage = "OCR Text extrahiert: \(String(text.prefix(50)))\(text.count > 50 ? "..." : "")"
+            toastMessage = localizationManager.localizedString(.ocrSuccess) + ": \(String(text.prefix(50)))\(text.count > 50 ? "..." : "")"
             showingToast = true
         }
     }

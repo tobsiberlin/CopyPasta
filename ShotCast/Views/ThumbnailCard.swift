@@ -90,7 +90,7 @@ struct ThumbnailCard: View {
                                 )
                         }
                         .buttonStyle(.plain)
-                        .help("Text per OCR extrahieren")
+                        .help(String(localized: .ocrExtract))
                         
                         Spacer()
                     }
@@ -99,40 +99,58 @@ struct ThumbnailCard: View {
                 .padding(4)
             }
             
-            // Dateityp-Indikator und Favorit
+            // Source-Badge und Favorit (wie im Screenshot)
             VStack {
                 HStack {
+                    // Favorit-Icon links oben
+                    if item.isFavorite {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                            .font(.caption2)
+                            .background(
+                                Circle()
+                                    .fill(.ultraThickMaterial)
+                                    .frame(width: 20, height: 20)
+                            )
+                    }
+                    
                     Spacer()
                     
-                    VStack(spacing: 2) {
-                        if item.isFavorite {
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.red)
-                                .font(.caption2)
-                        }
-                        
-                        Text(getFileTypeIndicator())
+                    // App-Source-Badge rechts oben (Shottr "S", VS Code "</>", etc.)
+                    if let sourceInfo = item.sourceInfo,
+                       let sourceBadge = sourceInfo.badge {
+                        Text(sourceBadge)
                             .font(.caption2)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: getFileTypeColors(),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(width: 18, height: 18)
                             .background(
-                                Capsule()
-                                    .fill(.ultraThickMaterial)
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(.white.opacity(0.3), lineWidth: 0.5)
-                                    )
+                                Circle()
+                                    .fill(sourceInfo.badgeColor)
+                                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                             )
+                            .help("\(LocalizationManager.shared.localizedString(.sourceLabel)): \(sourceInfo.displayName)")
                     }
                 }
                 Spacer()
+                
+                // Dateityp-Indikator unten rechts
+                HStack {
+                    Spacer()
+                    Text(getFileTypeIndicator())
+                        .font(.caption2)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(.black.opacity(0.6))
+                                .overlay(
+                                    Capsule()
+                                        .stroke(.white.opacity(0.3), lineWidth: 0.5)
+                                )
+                        )
+                }
             }
             .padding(4)
         }
@@ -141,83 +159,43 @@ struct ThumbnailCard: View {
         .animation(.easeInOut(duration: 0.2), value: isSelected)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
         .onTapGesture(count: 2, perform: onDoubleClick)
-        .draggable(getDraggableContent()) {
-            // Drag Preview
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.ultraThinMaterial)
-                    .frame(width: 60, height: 60)
-                
-                if item.isImage, let imageData = item.imageData, let nsImage = NSImage(data: imageData) {
-                    Image(nsImage: nsImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 56, height: 56)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                } else {
-                    VStack(spacing: 4) {
-                        Image(systemName: item.fileTypeCategory.icon)
-                            .font(.title)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: item.fileTypeCategory.colors,
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                        
-                        if item.isText, let text = item.textContent {
-                            Text(String(text.prefix(10)) + (text.count > 10 ? "..." : ""))
-                                .font(.caption2)
-                                .lineLimit(1)
-                                .foregroundColor(.secondary)
-                        } else if item.isURL, let urlString = item.urlString {
-                            Text(URL(string: urlString)?.host ?? urlString)
-                                .font(.caption2)
-                                .lineLimit(1)
-                                .foregroundColor(.secondary)
-                        } else if let fileName = item.fileName {
-                            Text(fileName)
-                                .font(.caption2)
-                                .lineLimit(1)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-            }
-            .opacity(0.8)
+        .onDrag {
+            DragManager.shared.createItemProvider(for: item)
         }
     }
     
-    private func getDraggableContent() -> Data {
-        if let imageData = item.imageData {
-            return imageData
-        } else if let text = item.textContent {
-            return text.data(using: .utf8) ?? Data()
-        }
-        return Data()
-    }
-    
-    // Neue kompakte Icon-Darstellung für alle Dateitypen
+    // Süße Icon-Darstellung wie im Screenshot
     private var fileTypeIconView: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             ZStack {
-                // Hintergrund-Kreis mit Farbverlauf
+                // Süßer Hintergrund-Kreis mit Verlauf und Schatten
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: item.fileTypeCategory.colors,
+                            colors: item.fileTypeCategory.colors.map { $0.opacity(0.9) },
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 48, height: 48)
-                    .shadow(color: item.fileTypeCategory.colors.first?.opacity(0.3) ?? .clear, radius: 4, x: 0, y: 2)
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.4), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
+                    .shadow(color: item.fileTypeCategory.colors.first?.opacity(0.3) ?? .clear, radius: 6, x: 0, y: 3)
                 
-                // Icon
+                // Süßes Icon mit besserer Typo
                 Image(systemName: item.fileTypeCategory.icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
             }
             
             // Dateiname oder Inhalt
@@ -253,6 +231,7 @@ struct ThumbnailCard: View {
     }
     
     private func getFileTypeIndicator() -> String {
+        let locManager = LocalizationManager.shared
         switch item.fileTypeCategory {
         case .image:
             switch item.contentType {
@@ -260,16 +239,17 @@ struct ThumbnailCard: View {
             case .jpeg: return "JPG"
             case .tiff: return "TIFF"
             case .heic: return "HEIC"
-            default: return "Image"
+            default: return locManager.localizedString(.fileTypeImage)
             }
-        case .text: return "Text"
-        case .document: return "Document"
-        case .pdf: return "PDF"
-        case .video: return "Video"
-        case .audio: return "Audio"
-        case .archive: return "Archive"
-        case .url: return "URL"
-        case .other: return "File"
+        case .text: return locManager.localizedString(.fileTypeText)
+        case .document: return locManager.localizedString(.fileTypeDocument)
+        case .pdf: return locManager.localizedString(.fileTypePDF)
+        case .video: return locManager.localizedString(.fileTypeVideo)
+        case .audio: return locManager.localizedString(.fileTypeAudio)
+        case .archive: return locManager.localizedString(.fileTypeArchive)
+        case .url: return locManager.localizedString(.fileTypeURL)
+        case .code: return locManager.localizedString(.fileTypeCode)
+        case .other: return locManager.localizedString(.fileTypeOther)
         }
     }
     
@@ -280,44 +260,21 @@ struct ThumbnailCard: View {
     private func performOCR() {
         guard item.isImage, let imageData = item.imageData else { return }
         
-        let request = VNRecognizeTextRequest { request, error in
-            if let error = error {
-                print("OCR Error: \(error.localizedDescription)")
-                return
-            }
-            
-            let observations = request.results as? [VNRecognizedTextObservation] ?? []
-            let recognizedText = observations.compactMap { observation in
-                observation.topCandidates(1).first?.string
-            }.joined(separator: "\n")
-            
+        OCRManager.shared.extractText(from: imageData, accuracy: .balanced) { result in
             DispatchQueue.main.async {
-                if !recognizedText.isEmpty {
-                    onOCRExtract?(recognizedText)
-                    // Kopiere erkannten Text in die Zwischenablage
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(recognizedText, forType: .string)
+                switch result {
+                case .success(let ocrResult):
+                    onOCRExtract?(ocrResult.text)
+                    print("✅ OCR text recognized: \(ocrResult.text.prefix(50))... (Confidence: \(String(format: "%.1f%%", ocrResult.confidence * 100)), Language: \(ocrResult.detectedLanguage))")
                     
-                    print("✅ OCR Text erkannt und kopiert: \(recognizedText.prefix(50))...")
-                } else {
-                    print("❌ Kein Text im Bild erkannt")
+                    // Show success feedback (could be a toast notification)
+                    // NotificationCenter.default.post(name: .ocrSuccess, object: ocrResult)
+                    
+                case .failure(let error):
+                    print("❌ OCR error: \(error.localizedDescription)")
+                    // Show error feedback
+                    // NotificationCenter.default.post(name: .ocrError, object: error)
                 }
-            }
-        }
-        
-        // Verbesserung der OCR-Genauigkeit
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-        
-        // Verarbeitung des Bildes
-        let handler = VNImageRequestHandler(data: imageData, options: [:])
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try handler.perform([request])
-            } catch {
-                print("OCR Processing Error: \(error.localizedDescription)")
             }
         }
     }

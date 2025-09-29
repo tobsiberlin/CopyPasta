@@ -78,6 +78,11 @@ struct ClipboardItem: Identifiable, Codable {
     let contentType: UTType
     let timestamp: Date
     var isFavorite: Bool = false
+    var sourceInfo: SourceDetector.SourceInfo? {
+        // Re-detect source info on each access for now
+        // In a real app, you'd want to store and persist this
+        return SourceDetector.shared.detectSource()
+    }
     
     enum CodingKeys: CodingKey {
         case content, contentType, timestamp, isFavorite
@@ -255,6 +260,10 @@ struct ClipboardItem: Identifiable, Codable {
                 mimeType.contains("archive") || 
                 mimeType.contains("compressed")
             ) { return .archive }
+            
+            // Code-Dateien erkennen
+            if isCodeFile(mimeType: mimeType) { return .code }
+            
             if mimeType.hasPrefix("text/") { return .document }
             
             return .document
@@ -270,34 +279,83 @@ struct ClipboardItem: Identifiable, Codable {
         return nil
     }
     
+    private func isCodeFile(mimeType: String) -> Bool {
+        let codeTypes = [
+            "text/javascript", "application/javascript",
+            "text/css", "text/html", "application/json",
+            "text/xml", "application/xml",
+            "text/x-python", "text/x-java-source",
+            "text/x-swift", "text/x-c", "text/x-c++",
+            "text/x-objective-c", "text/x-php",
+            "text/x-ruby", "text/x-go", "text/x-rust",
+            "text/x-kotlin", "text/x-dart"
+        ]
+        return codeTypes.contains(mimeType)
+    }
+    
     enum FileTypeCategory {
-        case image, text, document, pdf, video, audio, archive, url, other
+        case image, text, document, pdf, video, audio, archive, url, code, other
         
         var icon: String {
             switch self {
-            case .image: return "photo"
-            case .text: return "doc.text"
-            case .document: return "doc"
-            case .pdf: return "doc.richtext"
-            case .video: return "video"
-            case .audio: return "music.note"
-            case .archive: return "archivebox"
-            case .url: return "link"
-            case .other: return "doc.questionmark"
+            case .image: return "photo.artframe" // Süßeres Bild-Icon mit Rahmen
+            case .text: return "doc.text.magnifyingglass" // Text mit Lupe
+            case .document: return "doc.text.fill"
+            case .pdf: return "doc.richtext.fill"
+            case .video: return "play.rectangle.fill" 
+            case .audio: return "music.note.list" // Musik-Liste Icon
+            case .archive: return "archivebox.fill"
+            case .url: return "safari.fill" // Safari-Icon für URLs
+            case .code: return "terminal.fill" // Terminal für Code
+            case .other: return "questionmark.folder.fill" // Fragezeichen-Ordner
+            }
+        }
+        
+        var sourceBadge: String? {
+            // Spezielle Source-Badges wie im Screenshot
+            switch self {
+            case .image: return "S" // Screenshot badge
+            case .text: return nil
+            case .document: return "D" // Document badge
+            case .pdf: return "P" // PDF badge  
+            case .video: return "V" // Video badge
+            case .audio: return "A" // Audio badge
+            case .archive: return "Z" // Zip badge
+            case .url: return "🔗" // Link emoji
+            case .code: return "</>" // Code bracket
+            case .other: return "?"
             }
         }
         
         var colors: [Color] {
+            // Süße Pastell-Farben wie im Screenshot
             switch self {
-            case .image: return [.blue, .cyan]
-            case .text: return [.green, .mint]
-            case .document: return [.indigo, .blue]
-            case .pdf: return [.red, .orange]
-            case .video: return [.purple, .pink]
-            case .audio: return [.orange, .yellow]
-            case .archive: return [.brown, .orange]
-            case .url: return [.teal, .cyan]
-            case .other: return [.gray, .secondary]
+            case .image: return [Color(.systemBlue), Color(.systemCyan)]
+            case .text: return [Color(.systemGreen), Color(.systemMint)] 
+            case .document: return [Color(.systemIndigo), Color(.systemBlue)]
+            case .pdf: return [Color(.systemRed), Color(.systemOrange)]
+            case .video: return [Color(.systemPurple), Color(.systemPink)]
+            case .audio: return [Color(.systemOrange), Color(.systemYellow)]
+            case .archive: return [Color(.systemBrown), Color(.systemOrange)]
+            case .url: return [Color(.systemTeal), Color(.systemCyan)]
+            case .code: return [Color(.systemPurple), Color(.systemIndigo)]
+            case .other: return [Color(.systemGray), Color(.systemGray)]
+            }
+        }
+        
+        var badgeColor: Color {
+            // Badge-Hintergrundfarben
+            switch self {
+            case .image: return .red.opacity(0.9) // Rote "S"-Badge
+            case .text: return .blue.opacity(0.9)
+            case .document: return .green.opacity(0.9) 
+            case .pdf: return .red.opacity(0.9)
+            case .video: return .purple.opacity(0.9)
+            case .audio: return .orange.opacity(0.9)
+            case .archive: return .brown.opacity(0.9)
+            case .url: return .teal.opacity(0.9)
+            case .code: return .indigo.opacity(0.9)
+            case .other: return .gray.opacity(0.9)
             }
         }
     }

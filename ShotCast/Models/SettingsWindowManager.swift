@@ -20,19 +20,22 @@ class SettingsWindowManager: ObservableObject {
     }
     
     private func createSettingsWindow() {
-        let contentView = SettingsView()
+        let contentView = ModernSettingsView()
             .environmentObject(AppSettings.shared)
+            .environmentObject(LocalizationManager.shared)
         
         settingsWindow = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 500, height: 600),
-            styleMask: [.titled, .closable, .resizable],
+            contentRect: NSRect(x: 0, y: 0, width: 750, height: 550),
+            styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         
-        settingsWindow?.title = "ShotCast Einstellungen"
+        settingsWindow?.title = LocalizationManager.shared.localizedString(.settingsTitle)
         settingsWindow?.contentView = NSHostingView(rootView: contentView)
         settingsWindow?.isReleasedWhenClosed = false
+        settingsWindow?.titlebarAppearsTransparent = true
         settingsWindow?.center()
+        settingsWindow?.minSize = NSSize(width: 750, height: 550)
     }
 }
