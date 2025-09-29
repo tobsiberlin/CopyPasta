@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @StateObject private var settings = AppSettings.shared
     @Environment(\.colorScheme) var colorScheme
+    @State private var selectedLanguage: String = "system"
     
     private var effectiveColorScheme: ColorScheme {
         switch settings.themeMode {
@@ -21,6 +22,7 @@ struct SettingsView: View {
                     themeSection
                     appearanceSection  
                     behaviorSection
+                    languageSection
                     advancedSection
                     aboutSection
                 }
@@ -244,6 +246,37 @@ struct SettingsView: View {
         }
     }
     
+    private var languageSection: some View {
+        SettingsSection(title: "Sprache", icon: "globe") {
+            VStack(spacing: 16) {
+                HStack {
+                    Text("App-Sprache")
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    Picker("Sprache", selection: $selectedLanguage) {
+                        ForEach(getSupportedLanguages(), id: \.id) { language in
+                            HStack {
+                                Text(language.flag)
+                                Text(language.name)
+                            }
+                            .tag(language.id)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(width: 180)
+                }
+                
+                Text("Die App wird nach einem Neustart in der gewählten Sprache angezeigt.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
+            }
+        }
+    }
+    
     private var aboutSection: some View {
         SettingsSection(title: "Über ShotCast", icon: "info.circle") {
             VStack(spacing: 12) {
@@ -258,6 +291,25 @@ struct SettingsView: View {
             }
         }
     }
+    
+    private func getSupportedLanguages() -> [LanguageOption] {
+        return [
+            LanguageOption(id: "system", name: "System", flag: "🖥️"),
+            LanguageOption(id: "en", name: "English", flag: "🇺🇸"),
+            LanguageOption(id: "de", name: "Deutsch", flag: "🇩🇪"),
+            LanguageOption(id: "it", name: "Italiano", flag: "🇮🇹"),
+            LanguageOption(id: "es", name: "Español", flag: "🇪🇸"),
+            LanguageOption(id: "fr", name: "Français", flag: "🇫🇷"),
+            LanguageOption(id: "ja", name: "日本語", flag: "🇯🇵"),
+            LanguageOption(id: "zh", name: "中文", flag: "🇨🇳")
+        ]
+    }
+}
+
+struct LanguageOption {
+    let id: String
+    let name: String
+    let flag: String
 }
 
 struct SettingsSection<Content: View>: View {

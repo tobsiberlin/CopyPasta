@@ -443,6 +443,9 @@ struct BottomBarView: View {
             isHovered: hoveredItemID == item.id,
             onDoubleClick: {
                 handleDoubleClick(item: item)
+            },
+            onOCRExtract: { extractedText in
+                showOCRToast(with: extractedText)
             }
         )
         .frame(height: settings.barHeight - 20)
@@ -573,6 +576,13 @@ struct BottomBarView: View {
             } catch {
                 print("Fehler beim Öffnen des Textes: \(error)")
             }
+        }
+    }
+    
+    private func showOCRToast(with text: String) {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            toastMessage = "OCR Text extrahiert: \(String(text.prefix(50)))\(text.count > 50 ? "..." : "")"
+            showingToast = true
         }
     }
     

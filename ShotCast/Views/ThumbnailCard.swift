@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Vision
 
 struct ThumbnailCard: View {
     let item: ClipboardItem
@@ -67,8 +68,7 @@ struct ThumbnailCard: View {
                 VStack {
                     HStack {
                         Button(action: {
-                            // TODO: OCR implementieren
-                            print("🚧 OCR-Funktionalität wird implementiert")
+                            performOCR()
                         }) {
                             Image(systemName: "text.viewfinder")
                                 .font(.caption)
@@ -90,7 +90,7 @@ struct ThumbnailCard: View {
                                 )
                         }
                         .buttonStyle(.plain)
-                        .help("Text per OCR extrahieren (wird implementiert)")
+                        .help("Text per OCR extrahieren")
                         
                         Spacer()
                     }
@@ -275,5 +275,50 @@ struct ThumbnailCard: View {
     
     private func getFileTypeColors() -> [Color] {
         return item.fileTypeCategory.colors
+    }
+    
+    private func performOCR() {
+        guard item.isImage, let imageData = item.imageData else { return }
+        
+        let request = VNRecognizeTextRequest { request, error in
+            if let error = error {
+                print("OCR Error: \(error.localizedDescription)")
+                return
+            }
+            
+            let observations = request.results as? [VNRecognizedTextObservation] ?? []
+            let recognizedText = observations.compactMap { observation in
+                observation.topCandidates(1).first?.string
+            }.joined(separator: "\n")
+            
+            DispatchQueue.main.async {
+                if !recognizedText.isEmpty {
+                    onOCRExtract?(recognizedText)
+                    // Kopiere erkannten Text in die Zwischenablage
+                    let pasteboard = NSPasteboard.general
+                    pasteboard.clearContents()
+                    pasteboard.setString(recognizedText, forType: .string)
+                    
+                    print("✅ OCR Text erkannt und kopiert: \(recognizedText.prefix(50))...")
+                } else {
+                    print("❌ Kein Text im Bild erkannt")
+                }
+            }
+        }
+        
+        // Verbesserung der OCR-Genauigkeit
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        
+        // Verarbeitung des Bildes
+        let handler = VNImageRequestHandler(data: imageData, options: [:])
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform([request])
+            } catch {
+                print("OCR Processing Error: \(error.localizedDescription)")
+            }
+        }
     }
 }
