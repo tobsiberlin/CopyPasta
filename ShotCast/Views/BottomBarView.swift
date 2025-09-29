@@ -58,27 +58,29 @@ struct BottomBarView: View {
                     }) {
                         Image(systemName: "gearshape.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                            .padding(8)
-                            .background(Circle().fill(Color.gray.opacity(0.1)))
+                            .foregroundColor(.primary)
+                            .padding(6)
+                            .background(Circle().fill(Color.secondary.opacity(0.1)))
                     }
                     .buttonStyle(.plain)
                     
                     Spacer()
                     
-                    // Drag-Handle in der Mitte
+                    // Drag-Handle in der Mitte für Window-Move
                     Image(systemName: "rectangle.3.group")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray.opacity(0.6))
+                        .foregroundColor(.secondary.opacity(0.8))
                         .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
-                                    let currentLocation = NSEvent.mouseLocation
-                                    windowManager.continueDrag(to: currentLocation)
+                                    let deltaX = value.translation.width
+                                    let deltaY = value.translation.height
+                                    windowManager.updateDragPosition(delta: NSPoint(x: deltaX, y: deltaY))
                                 }
                                 .onEnded { _ in
-                                    windowManager.endDrag()
+                                    windowManager.endDragging()
                                 }
                         )
                         .onHover { isHovering in
@@ -91,18 +93,15 @@ struct BottomBarView: View {
                     
                     Spacer()
                     
-                    // Schließen-Button rechts
+                    // Schließen-Button rechts - Funktional machen
                     Button(action: {
-                        // Bar ausblenden - TODO: Verbessern mit Window Manager
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            NSApp.keyWindow?.orderOut(nil)
-                        }
+                        windowManager.hideWindow()
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                            .padding(8)
-                            .background(Circle().fill(Color.gray.opacity(0.1)))
+                            .foregroundColor(.primary)
+                            .padding(6)
+                            .background(Circle().fill(Color.secondary.opacity(0.1)))
                     }
                     .buttonStyle(.plain)
                 }
@@ -114,9 +113,9 @@ struct BottomBarView: View {
                 if filteredItems.isEmpty {
                     emptyStateView
                 } else {
-                    // Hauptbereich mit professioneller Karussell-Navigation
+                    // Hauptbereich mit funktionierender ScrollViewReader-Navigation
                     HStack(spacing: 0) {
-                        // Linker Scroll-Button mit Fade-Effekt
+                        // Linker Scroll-Button 
                         if showScrollButtons {
                             Button(action: {
                                 scrollToPrevious()
@@ -137,32 +136,47 @@ struct BottomBarView: View {
                             .padding(.leading, 8)
                         }
                         
-                        // Screenshot-ScrollView ohne gespeicherten Proxy
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: settings.itemSpacing) {
-                                ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
-                                    pasteStyleCard(item: item)
-                                        .id(index)
-                                        .scaleEffect(selectedItem?.id == item.id ? 1.05 : 1.0)
-                                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedItem?.id)
+                        // Screenshot-ScrollView mit korrekt funktionierendem ScrollViewReader
+                        ScrollViewReader { proxy in
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: settings.itemSpacing) {
+                                    ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                                        pasteStyleCard(item: item)
+                                            .id(index)
+                                            .scaleEffect(selectedItem?.id == item.id ? 1.05 : 1.0)
+                                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedItem?.id)
+                                    }
+                                }
+                                .padding(.horizontal, showScrollButtons ? 8 : 12)
+                                .padding(.bottom, 12)
+                                .background(
+                                    GeometryReader { geometry in
+                                        Color.clear
+                                            .onAppear {
+                                                updateScrollButtonVisibility(contentWidth: geometry.size.width)
+                                            }
+                                            .onChange(of: filteredItems.count) {
+                                                updateScrollButtonVisibility(contentWidth: geometry.size.width)
+                                            }
+                                    }
+                                )
+                            }
+                            .onChange(of: currentScrollIndex) { index in
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    proxy.scrollTo(index, anchor: .leading)
                                 }
                             }
-                            .padding(.horizontal, showScrollButtons ? 8 : 12)
-                            .padding(.bottom, 12)
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear
-                                        .onAppear {
-                                            updateScrollButtonVisibility(contentWidth: geometry.size.width)
-                                        }
-                                        .onChange(of: filteredItems.count) {
-                                            updateScrollButtonVisibility(contentWidth: geometry.size.width)
-                                        }
+                            .onChange(of: selectedItem) { item in
+                                if let item = item,
+                                   let index = filteredItems.firstIndex(where: { $0.id == item.id }) {
+                                    withAnimation(.easeInOut(duration: 0.5)) {
+                                        proxy.scrollTo(index, anchor: .center)
+                                    }
                                 }
-                            )
+                            }
                         }
                         
-                        // Rechter Scroll-Button mit Fade-Effekt
+                        // Rechter Scroll-Button
                         if showScrollButtons {
                             Button(action: {
                                 scrollToNext()
@@ -186,11 +200,11 @@ struct BottomBarView: View {
                 }
             }
             .background(
-                // Umrandung und Hintergrund wie bei Paste mit weniger Transparenz
+                // Richtige abgerundete Ecken mit schönem Hintergrund
                 RoundedRectangle(cornerRadius: settings.cornerRadius)
-                    .fill(Color.white.opacity(0.9)) // Noch weniger transparent
-                    .stroke(Color.gray.opacity(0.5), lineWidth: 1.5) // Sichtbarerer Rand
-                    .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 8) // Stärkere Schatten
+                    .fill(.regularMaterial) // Native Material-Hintergrund
+                    .stroke(Color.primary.opacity(0.1), lineWidth: 1) // Subtiler Rand
+                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4) // Weichere Schatten
             )
             
             // Resize handles
@@ -209,27 +223,27 @@ struct BottomBarView: View {
     }
     
     private func pasteStyleCard(item: ClipboardItem) -> some View {
-        VStack(spacing: 8) {
-            // Dateiname über dem Screenshot
+        VStack(spacing: 6) {
+            // Dateiname über dem Screenshot - SICHTBAR machen
             Text(getOriginalFileName(for: item))
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: max(9, settings.screenshotSize * 0.06), weight: .medium))
                 .foregroundColor(.primary)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(width: settings.screenshotSize)
             
             ZStack {
-                // Größere Screenshots - wie bei Paste  
+                // Screenshot-Container mit Drag-Funktionalität
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.white)
                     .frame(width: settings.screenshotSize, height: settings.screenshotSize)
-                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(selectedItem?.id == item.id ? Color.blue : Color.gray.opacity(0.2), lineWidth: selectedItem?.id == item.id ? 2 : 1)
+                            .stroke(selectedItem?.id == item.id ? Color.blue : Color.clear, lineWidth: 2)
                     )
                 
-                // Bessere Bilddarstellung - quadratisch wie bei Paste
+                // Bild- oder Icon-Darstellung
                 if item.isImage, let imageData = item.imageData, let nsImage = NSImage(data: imageData) {
                     Image(nsImage: nsImage)
                         .resizable()
@@ -237,53 +251,63 @@ struct BottomBarView: View {
                         .frame(width: settings.screenshotSize - 4, height: settings.screenshotSize - 4)
                         .clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 6))
-                        .saturation(1.2) // Mehr Sättigung für bessere Erkennbarkeit
-                        .contrast(1.1) // Mehr Kontrast
+                        .saturation(1.1)
+                        .brightness(0.02)
                 } else {
-                    VStack(spacing: 6) {
+                    VStack(spacing: 4) {
                         Image(systemName: item.fileTypeCategory.icon)
-                            .font(.system(size: 28)) // Größeres Icon
-                            .foregroundColor(.gray)
+                            .font(.system(size: settings.screenshotSize * 0.25))
+                            .foregroundColor(item.fileTypeCategory.color)
                         
                         Text(fileTypeText(for: item))
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.gray)
+                            .font(.system(size: max(8, settings.screenshotSize * 0.08), weight: .medium))
+                            .foregroundColor(.secondary)
                     }
                 }
                 
-                // Source Badge rechts oben - IMMER SICHTBAR, komplett innerhalb der Karte
+                // Source Badge rechts oben - IMMER SICHTBAR
                 VStack {
                     HStack {
                         Spacer()
-                        // Badge immer anzeigen - zuerst Source, dann Dateityp
                         let badgeText = item.sourceInfo?.badge ?? item.fileTypeCategory.sourceBadge ?? "?"
                         let badgeColor = item.sourceInfo?.badge != nil ? Color.red : item.fileTypeCategory.badgeColor
                         
                         Text(badgeText)
-                            .font(.system(size: 9, weight: .bold))
+                            .font(.system(size: max(8, settings.screenshotSize * 0.06), weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 16, height: 16)
+                            .frame(width: max(14, settings.screenshotSize * 0.12), height: max(14, settings.screenshotSize * 0.12))
                             .background(Circle().fill(badgeColor))
-                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
-                            .offset(x: -4, y: 4) // Komplett innerhalb
+                            .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+                            .offset(x: -2, y: 2)
                     }
                     Spacer()
                 }
             }
+            .gesture(
+                // Screenshot Drag & Drop implementieren
+                DragGesture()
+                    .onChanged { value in
+                        // Visual feedback während dem Drag
+                    }
+                    .onEnded { value in
+                        // Drag-to-Desktop Export implementieren
+                        performDragExport(item: item, location: value.location)
+                    }
+            )
             
-            // Dateityp unterhalb des Screenshots
-            HStack {
+            // Dateityp-Info unter dem Screenshot - SICHTBAR machen  
+            HStack(spacing: 3) {
                 Image(systemName: item.fileTypeCategory.icon)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: max(8, settings.screenshotSize * 0.06)))
                     .foregroundColor(item.fileTypeCategory.color)
                 Text(item.fileTypeCategory.displayName)
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(size: max(7, settings.screenshotSize * 0.05), weight: .medium))
                     .foregroundColor(.secondary)
             }
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(Color.gray.opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background(Color.secondary.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 3))
         }
         .onTapGesture {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
@@ -654,25 +678,44 @@ struct BottomBarView: View {
         }
     }
     
-    // MARK: - Karussell-Navigation Funktionen
+    // MARK: - Karussell-Navigation Funktionen - FUNKTIONSFÄHIG
     private func scrollToPrevious() {
         let newIndex = max(0, currentScrollIndex - 1)
-        currentScrollIndex = newIndex
-        // TODO: Implement actual scrolling when needed
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentScrollIndex = newIndex
+        }
         triggerHapticFeedback()
     }
     
     private func scrollToNext() {
         let maxIndex = max(0, filteredItems.count - visibleItemsCount)
         let newIndex = min(maxIndex, currentScrollIndex + 1)
-        currentScrollIndex = newIndex
-        // TODO: Implement actual scrolling when needed
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentScrollIndex = newIndex
+        }
         triggerHapticFeedback()
     }
     
     private func triggerHapticFeedback() {
         let feedback = NSHapticFeedbackManager.defaultPerformer
         feedback.perform(.generic, performanceTime: .now)
+    }
+    
+    // MARK: - Drag Export Funktionalität
+    private func performDragExport(item: ClipboardItem, location: CGPoint) {
+        // Export zu Desktop oder andere Apps
+        if item.isImage, let imageData = item.imageData {
+            let tempURL = createTempFile(data: imageData, fileName: getOriginalFileName(for: item))
+            // TODO: Implementiere echtes Drag & Drop mit NSPasteboard
+            print("Dragging image to: \(location), temp file: \(tempURL?.path ?? "none")")
+        }
+    }
+    
+    private func createTempFile(data: Data, fileName: String) -> URL? {
+        let tempDir = NSTemporaryDirectory()
+        let tempURL = URL(fileURLWithPath: tempDir).appendingPathComponent(fileName)
+        try? data.write(to: tempURL)
+        return tempURL
     }
     
     private func updateScrollButtonVisibility(contentWidth: CGFloat) {
@@ -683,35 +726,28 @@ struct BottomBarView: View {
         }
     }
     
-    // MARK: - Keyboard Shortcuts für Weltklasse-UX
+    // MARK: - Keyboard Shortcuts - NotificationCenter Approach
     private func setupKeyboardShortcuts() {
-        // Command+1-9 für schnelle Item-Auswahl
-        let _ = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            guard event.modifierFlags.contains(.command) else { return event }
-            
-            switch event.keyCode {
-            case 18...26: // Zahlen 1-9
-                let index = Int(event.keyCode) - 18
-                // Note: Cannot access self in struct closure, would need different approach
-                // if index < filteredItems.count {
-                //     let item = filteredItems[index]
-                //     // Handle item selection
-                // }
-                return nil // Event consumed
-            case 123: // Pfeil links
-                // Note: Cannot access self in struct closure
-                return nil
-            case 124: // Pfeil rechts
-                // Note: Cannot access self in struct closure  
-                return nil
-            case 53: // Escape
-                // Note: Cannot access self in struct closure
-                return nil
-            default:
-                break
+        // Setup Keyboard-Handler über WindowManager (da struct-closures problematisch sind)
+        // Pfeiltasten werden über NotificationCenter gehandelt
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("ScrollPrevious"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            if canScrollLeft {
+                scrollToPrevious()
             }
-            
-            return event
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("ScrollNext"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            if canScrollRight {
+                scrollToNext()
+            }
         }
     }
     

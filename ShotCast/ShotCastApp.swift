@@ -237,6 +237,7 @@ struct MenuItemButton: View {
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var pasteboardWatcher: PasteboardWatcher?
     private var windowManager = WindowManager.shared
+    private var globalShortcutMonitor: Any?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -251,6 +252,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             name: .clipboardAutoActivated,
             object: nil
         )
+        
+        // Setup Global Shortcut Cmd+Shift+D
+        setupGlobalShortcuts()
+    }
+    
+    private func setupGlobalShortcuts() {
+        // Global shortcut Cmd+Shift+D für ShotCast anzeigen/verstecken
+        globalShortcutMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Cmd+Shift+D (keyCode 2 = 'D')
+            if event.modifierFlags.contains([.command, .shift]) && event.keyCode == 2 {
+                DispatchQueue.main.async {
+                    self?.windowManager.toggleWindow()
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+            }
+            // Pfeiltasten für Navigation, wenn ShotCast-Window aktiv ist
+            else if self?.windowManager.isVisible == true {
+                switch event.keyCode {
+                case 123: // Pfeil links
+                    NotificationCenter.default.post(name: Notification.Name("ScrollPrevious"), object: nil)
+                case 124: // Pfeil rechts
+                    NotificationCenter.default.post(name: Notification.Name("ScrollNext"), object: nil)
+                default:
+                    break
+                }
+            }
+        }
+        
+        print("⌨️ Global Shortcuts: Cmd+Shift+D aktiviert")
     }
     
     @objc private func handleAutoActivation() {
@@ -260,6 +290,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationWillTerminate(_ notification: Notification) {
         pasteboardWatcher?.stopMonitoring()
+        
+        // Cleanup Global Shortcuts
+        if let monitor = globalShortcutMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

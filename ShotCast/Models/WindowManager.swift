@@ -128,7 +128,7 @@ class WindowManager: ObservableObject {
         window.setFrame(newFrame, display: true, animate: true)
     }
     
-    // MARK: - Resize Funktionalität
+    // MARK: - Resize Funktionalität mit automatischer Symbol-Anpassung
     func resizeWindow(deltaWidth: CGFloat, fromLeft: Bool = false) {
         guard let window = window else { return }
         
@@ -138,10 +138,10 @@ class WindowManager: ObservableObject {
         if fromLeft {
             // Resize von links: Position und Breite ändern
             newFrame.origin.x = max(0, currentFrame.origin.x - deltaWidth)
-            newFrame.size.width = max(200, currentFrame.width + deltaWidth)
+            newFrame.size.width = max(300, currentFrame.width + deltaWidth)
         } else {
             // Resize von rechts: Nur Breite ändern
-            newFrame.size.width = max(200, currentFrame.width + deltaWidth)
+            newFrame.size.width = max(300, currentFrame.width + deltaWidth)
         }
         
         // Bildschirmgrenzen respektieren
@@ -154,12 +154,33 @@ class WindowManager: ObservableObject {
             newFrame.origin.x = max(screenFrame.minX, newFrame.origin.x)
         }
         
+        // Intelligente Symbol-Größen-Anpassung basierend auf Fenstergröße
+        let baseWidth: CGFloat = 800 // Referenzbreite für Standard-Screenshot-Größe
+        let baseScreenshotSize: CGFloat = 176 // Basis-Screenshot-Größe
+        let minScreenshotSize: CGFloat = 88
+        let maxScreenshotSize: CGFloat = 320
+        
+        let ratio = newFrame.size.width / baseWidth
+        let newScreenshotSize = max(minScreenshotSize, min(maxScreenshotSize, baseScreenshotSize * ratio))
+        
+        // Update AppSettings Screenshot-Größe
+        DispatchQueue.main.async {
+            AppSettings.shared.screenshotSize = newScreenshotSize
+            AppSettings.shared.barHeight = newScreenshotSize + 100 // Auto-adjust bar height
+        }
+        
         // Smooth Animation
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.1
             context.allowsImplicitAnimation = true
             window.setFrame(newFrame, display: true, animate: true)
         }
+        
+        // Trigger Live-Update für sofortiges UI-Feedback
+        NotificationCenter.default.post(
+            name: Notification.Name("SettingsLiveUpdate"),
+            object: nil
+        )
     }
     
     // MARK: - Drag-to-Move Funktionalität

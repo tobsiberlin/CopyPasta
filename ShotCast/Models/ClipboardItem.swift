@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
-enum ClipboardContent: Codable {
+enum ClipboardContent: Codable, Equatable {
     case image(data: Data)
     case text(content: String)
     case file(data: Data, name: String, mimeType: String)
@@ -72,7 +72,7 @@ enum ClipboardContent: Codable {
     }
 }
 
-struct ClipboardItem: Identifiable, Codable {
+struct ClipboardItem: Identifiable, Codable, Equatable {
     let id = UUID()
     let content: ClipboardContent
     let contentType: UTType

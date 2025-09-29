@@ -8,7 +8,7 @@ class SourceDetector {
     
     private init() {}
     
-    enum ClipboardSource {
+    enum ClipboardSource: Equatable {
         case app(bundleId: String, name: String)
         case universalClipboard(deviceType: DeviceType)
         case unknown
@@ -36,7 +36,7 @@ class SourceDetector {
         }
     }
     
-    struct SourceInfo {
+    struct SourceInfo: Equatable {
         let source: ClipboardSource
         let icon: String
         let badge: String?

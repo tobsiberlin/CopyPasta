@@ -127,27 +127,27 @@ struct SettingsView: View {
     
     private var themeSection: some View {
         SettingsSection(title: "Design", icon: "paintbrush") {
-            VStack(spacing: 16) {
-                HStack {
-                    Text("Farbschema")
-                        .font(.subheadline)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Picker("Theme", selection: $settings.themeMode) {
-                        ForEach(AppSettings.ThemeMode.allCases, id: \.self) { mode in
-                            HStack {
-                                Image(systemName: mode.icon)
-                                    .font(.system(size: 14))
-                                Text(mode.displayName)
-                            }
-                            .tag(mode)
+            HStack {
+                Text("Farbschema")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Picker("Theme", selection: $settings.themeMode) {
+                    ForEach(AppSettings.ThemeMode.allCases, id: \.self) { mode in
+                        HStack {
+                            Image(systemName: mode.icon)
+                                .font(.system(size: 12))
+                            Text(mode.displayName)
+                                .font(.caption)
                         }
+                        .tag(mode)
                     }
-                    .pickerStyle(.segmented)
-                    .frame(width: 200)
                 }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 200)
+                .controlSize(.small)
             }
         }
     }
