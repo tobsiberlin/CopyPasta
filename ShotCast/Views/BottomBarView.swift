@@ -310,8 +310,11 @@ struct BottomBarView: View {
     
     private var mainContent: some View {
         HStack(spacing: 0) {
-            settingsButton
-                .padding(.leading, 16)
+            HStack(spacing: 8) {
+                resizeIndicator
+                settingsButton
+            }
+            .padding(.leading, 12)
             
             if filteredItems.isEmpty {
                 emptyStateView
@@ -320,7 +323,17 @@ struct BottomBarView: View {
             }
             
             closeButton
-                .padding(.trailing, 16)
+                .padding(.trailing, 12)
+        }
+    }
+    
+    private var resizeIndicator: some View {
+        VStack(spacing: 2) {
+            ForEach(0..<3, id: \.self) { _ in
+                Circle()
+                    .fill(Color.secondary.opacity(0.4))
+                    .frame(width: 3, height: 3)
+            }
         }
     }
     
@@ -330,28 +343,17 @@ struct BottomBarView: View {
                 SettingsWindowManager.shared.showSettingsWindow()
             }
         }) {
-            Image(systemName: "slider.horizontal.3")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(accentGradient)
-                .frame(width: 40, height: 40)
+            Image(systemName: "gearshape")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+                .frame(width: 32, height: 32)
                 .background(
-                    ZStack {
-                        Circle()
-                            .fill(backgroundGradient)
-                            .opacity(0.8)
-                        
-                        Circle()
-                            .stroke(accentGradient, lineWidth: 2)
-                            .opacity(0.8)
-                        
-                        Circle()
-                            .fill(accentGradient)
-                            .opacity(0.1)
-                            .scaleEffect(0.7)
-                    }
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(.ultraThinMaterial)
+                        .stroke(Color.primary.opacity(0.2), lineWidth: 1)
                 )
-                .scaleEffect(hoveredItemID?.uuidString == "settings-button" ? 1.2 : 1.0)
-                .shadow(color: .accentColor.opacity(0.4), radius: 8, x: 0, y: 4)
+                .scaleEffect(hoveredItemID?.uuidString == "settings-button" ? 1.1 : 1.0)
+                .opacity(hoveredItemID?.uuidString == "settings-button" ? 0.8 : 0.6)
         }
         .buttonStyle(.plain)
         .help("ShotCast Einstellungen")
@@ -372,39 +374,17 @@ struct BottomBarView: View {
                 windowManager.hideWindow()
             }
         }) {
-            Image(systemName: "power")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(LinearGradient(
-                    colors: [.red, .orange],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                ))
-                .frame(width: 40, height: 40)
+            Image(systemName: "xmark")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
+                .frame(width: 20, height: 20)
                 .background(
-                    ZStack {
-                        Circle()
-                            .fill(backgroundGradient)
-                            .opacity(0.8)
-                        
-                        Circle()
-                            .stroke(LinearGradient(
-                                colors: [.red.opacity(0.6), .orange.opacity(0.6)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ), lineWidth: 2)
-                            .opacity(0.8)
-                        
-                        Circle()
-                            .fill(LinearGradient(
-                                colors: [.red.opacity(0.1), .orange.opacity(0.1)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            .scaleEffect(0.7)
-                    }
+                    Circle()
+                        .fill(.ultraThinMaterial)
+                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                 )
-                .scaleEffect(hoveredItemID?.uuidString == "close-button" ? 1.2 : 1.0)
-                .shadow(color: .red.opacity(0.4), radius: 8, x: 0, y: 4)
+                .scaleEffect(hoveredItemID?.uuidString == "close-button" ? 1.1 : 1.0)
+                .opacity(hoveredItemID?.uuidString == "close-button" ? 0.8 : 0.5)
         }
         .buttonStyle(.plain)
         .help("ShotCast schließen")
