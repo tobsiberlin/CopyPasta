@@ -246,6 +246,16 @@ struct BottomBarView: View {
         }
     }
     
+    private var windowDragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                windowManager.updateDragPosition(delta: NSPoint(x: value.translation.width, y: -value.translation.height))
+            }
+            .onEnded { _ in
+                windowManager.endDragging()
+            }
+    }
+    
     private var resizeArea: some View {
         HStack(spacing: 0) {
             // Links-Resize für Breite
@@ -316,10 +326,20 @@ struct BottomBarView: View {
             }
             .padding(.leading, 12)
             
-            if filteredItems.isEmpty {
-                emptyStateView
-            } else {
-                itemScrollView
+            // Center content with drag handle
+            ZStack {
+                // Drag handle background
+                Rectangle()
+                    .fill(Color.clear)
+                    .contentShape(Rectangle())
+                    .gesture(windowDragGesture)
+                
+                // Content
+                if filteredItems.isEmpty {
+                    emptyStateView
+                } else {
+                    itemScrollView
+                }
             }
             
             closeButton

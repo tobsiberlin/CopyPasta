@@ -2,12 +2,20 @@ import Foundation
 import SwiftUI
 import AppKit
 
+enum WindowEdge {
+    case top, bottom, left, right, center
+}
+
 class WindowManager: ObservableObject {
     static let shared = WindowManager()
     
     private var window: NSWindow?
     private var hideTimer: Timer?
     @Published var isVisible = false
+    @Published var currentEdge: WindowEdge = .center
+    
+    private var isDragging = false
+    private var dragStartPoint: NSPoint = .zero
     
     private init() {}
     
@@ -80,7 +88,7 @@ class WindowManager: ObservableObject {
         window?.backgroundColor = .clear
         window?.level = .floating
         window?.collectionBehavior = [.canJoinAllSpaces, .stationary]
-        window?.isMovable = false
+        window?.isMovable = true
         window?.acceptsMouseMovedEvents = true
     }
     
@@ -161,5 +169,161 @@ class WindowManager: ObservableObject {
     
     func handleMouseExited() {
         scheduleAutoHide()
+    }
+    
+    // MARK: - Window Dragging & Snapping
+    
+    func startDragging(at point: NSPoint) {
+        isDragging = true
+        dragStartPoint = point
+    }
+    
+    func endDragging() {
+        if isDragging {
+            isDragging = false
+            snapToNearestEdge()
+        }
+    }
+    
+    func updateDragPosition(delta: NSPoint) {
+        guard isDragging, let window = window else { return }
+        
+        let currentFrame = window.frame
+        let newFrame = NSRect(
+            x: currentFrame.origin.x + delta.x,
+            y: currentFrame.origin.y + delta.y,
+            width: currentFrame.width,
+            height: currentFrame.height
+        )
+        
+        window.setFrame(newFrame, display: true, animate: false)
+    }
+    
+    private func snapToNearestEdge() {
+        guard let window = window, let screen = NSScreen.main else { return }
+        
+        let windowFrame = window.frame
+        let screenFrame = screen.visibleFrame
+        let snapDistance: CGFloat = 50 // Pixel-Abstand für Snapping
+        
+        // Koordinaten für zukünftige Verwendung
+        let _ = windowFrame.midX  // windowCenterX
+        let _ = windowFrame.midY  // windowCenterY
+        
+        var targetEdge: WindowEdge = .center
+        var targetFrame = windowFrame
+        
+        // Prüfe Distanz zu den Rändern
+        let distanceToTop = abs(windowFrame.maxY - screenFrame.maxY)
+        let distanceToBottom = abs(windowFrame.minY - screenFrame.minY)
+        let distanceToLeft = abs(windowFrame.minX - screenFrame.minX)
+        let distanceToRight = abs(windowFrame.maxX - screenFrame.maxX)
+        
+        let minDistance = min(distanceToTop, distanceToBottom, distanceToLeft, distanceToRight)
+        
+        if minDistance <= snapDistance {
+            if minDistance == distanceToTop {
+                // Snap to top
+                targetEdge = .top
+                targetFrame = NSRect(
+                    x: screenFrame.midX - windowFrame.width / 2,
+                    y: screenFrame.maxY - windowFrame.height - 10,
+                    width: windowFrame.width,
+                    height: windowFrame.height
+                )
+            } else if minDistance == distanceToBottom {
+                // Snap to bottom
+                targetEdge = .bottom
+                targetFrame = NSRect(
+                    x: screenFrame.midX - windowFrame.width / 2,
+                    y: screenFrame.minY + 10,
+                    width: windowFrame.width,
+                    height: windowFrame.height
+                )
+            } else if minDistance == distanceToLeft {
+                // Snap to left
+                targetEdge = .left
+                targetFrame = NSRect(
+                    x: screenFrame.minX + 10,
+                    y: screenFrame.midY - windowFrame.height / 2,
+                    width: windowFrame.width,
+                    height: windowFrame.height
+                )
+            } else if minDistance == distanceToRight {
+                // Snap to right
+                targetEdge = .right
+                targetFrame = NSRect(
+                    x: screenFrame.maxX - windowFrame.width - 10,
+                    y: screenFrame.midY - windowFrame.height / 2,
+                    width: windowFrame.width,
+                    height: windowFrame.height
+                )
+            }
+            
+            // Animiere zum Ziel
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.3
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                window.animator().setFrame(targetFrame, display: true)
+            }
+            
+            currentEdge = targetEdge
+        } else {
+            currentEdge = .center
+        }
+    }
+    
+    func snapToEdge(_ edge: WindowEdge) {
+        guard let window = window, let screen = NSScreen.main else { return }
+        
+        let windowFrame = window.frame
+        let screenFrame = screen.visibleFrame
+        var targetFrame = windowFrame
+        
+        switch edge {
+        case .top:
+            targetFrame = NSRect(
+                x: screenFrame.midX - windowFrame.width / 2,
+                y: screenFrame.maxY - windowFrame.height - 10,
+                width: windowFrame.width,
+                height: windowFrame.height
+            )
+        case .bottom:
+            targetFrame = NSRect(
+                x: screenFrame.midX - windowFrame.width / 2,
+                y: screenFrame.minY + 10,
+                width: windowFrame.width,
+                height: windowFrame.height
+            )
+        case .left:
+            targetFrame = NSRect(
+                x: screenFrame.minX + 10,
+                y: screenFrame.midY - windowFrame.height / 2,
+                width: windowFrame.width,
+                height: windowFrame.height
+            )
+        case .right:
+            targetFrame = NSRect(
+                x: screenFrame.maxX - windowFrame.width - 10,
+                y: screenFrame.midY - windowFrame.height / 2,
+                width: windowFrame.width,
+                height: windowFrame.height
+            )
+        case .center:
+            targetFrame = NSRect(
+                x: screenFrame.midX - windowFrame.width / 2,
+                y: screenFrame.minY + 20,
+                width: windowFrame.width,
+                height: windowFrame.height
+            )
+        }
+        
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.3
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            window.animator().setFrame(targetFrame, display: true)
+        }
+        
+        currentEdge = edge
     }
 }
