@@ -10,6 +10,8 @@ struct BottomBarView: View {
     
     @State private var selectedItem: ClipboardItem?
     @State private var hoveredItemID: UUID?
+    @State private var showingToast = false
+    @State private var toastMessage = ""
     
     var filteredItems: [ClipboardItem] {
         let items = pasteboardWatcher.clipboardItems
@@ -24,8 +26,9 @@ struct BottomBarView: View {
         case .light:
             return LinearGradient(
                 gradient: Gradient(colors: [
-                    Color.white.opacity(0.95),
-                    Color.blue.opacity(0.1)
+                    Color.white.opacity(0.98),
+                    Color(red: 0.98, green: 0.99, blue: 1.0).opacity(0.95),
+                    Color(red: 0.96, green: 0.98, blue: 1.0).opacity(0.9)
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -34,7 +37,8 @@ struct BottomBarView: View {
             return LinearGradient(
                 gradient: Gradient(colors: [
                     Color.black.opacity(0.9),
-                    Color.purple.opacity(0.3)
+                    Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.9),
+                    Color.blue.opacity(0.4)
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -44,15 +48,17 @@ struct BottomBarView: View {
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color.black.opacity(0.9),
-                        Color.purple.opacity(0.3)
+                        Color(red: 0.05, green: 0.1, blue: 0.2).opacity(0.9),
+                        Color.blue.opacity(0.4)
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 ) :
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        Color.white.opacity(0.95),
-                        Color.blue.opacity(0.1)
+                        Color.white.opacity(0.98),
+                        Color(red: 0.98, green: 0.99, blue: 1.0).opacity(0.95),
+                        Color(red: 0.96, green: 0.98, blue: 1.0).opacity(0.9)
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -64,25 +70,41 @@ struct BottomBarView: View {
         switch settings.themeMode {
         case .light:
             return LinearGradient(
-                colors: [.blue, .cyan, .green],
+                colors: [
+                    Color(red: 0.2, green: 0.6, blue: 1.0),
+                    Color(red: 0.4, green: 0.8, blue: 1.0),
+                    Color(red: 0.6, green: 0.9, blue: 1.0)
+                ],
                 startPoint: .leading,
                 endPoint: .trailing
             )
         case .dark:
             return LinearGradient(
-                colors: [.purple, .pink, .orange],
+                colors: [
+                    Color(red: 0.1, green: 0.4, blue: 0.8),
+                    Color(red: 0.3, green: 0.6, blue: 1.0),
+                    Color(red: 0.5, green: 0.8, blue: 1.0)
+                ],
                 startPoint: .leading,
                 endPoint: .trailing
             )
         case .system:
             return colorScheme == .dark ? 
                 LinearGradient(
-                    colors: [.purple, .pink, .orange],
+                    colors: [
+                        Color(red: 0.1, green: 0.4, blue: 0.8),
+                        Color(red: 0.3, green: 0.6, blue: 1.0),
+                        Color(red: 0.5, green: 0.8, blue: 1.0)
+                    ],
                     startPoint: .leading,
                     endPoint: .trailing
                 ) :
                 LinearGradient(
-                    colors: [.blue, .cyan, .green],
+                    colors: [
+                        Color(red: 0.2, green: 0.6, blue: 1.0),
+                        Color(red: 0.4, green: 0.8, blue: 1.0),
+                        Color(red: 0.6, green: 0.9, blue: 1.0)
+                    ],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
@@ -123,6 +145,70 @@ struct BottomBarView: View {
                 .shadow(color: .accentColor.opacity(0.3), radius: 20, x: 0, y: 10)
                 .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
             )
+            
+            // Toast Overlay
+            if showingToast {
+                VStack {
+                    Spacer()
+                    
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.green, .mint],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Kopiert!")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text(toastMessage)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(16)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(.ultraThickMaterial)
+                            
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.green.opacity(0.5), .mint.opacity(0.5)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        }
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.8).combined(with: .opacity),
+                        removal: .scale(scale: 0.8).combined(with: .opacity)
+                    ))
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            withAnimation {
+                                showingToast = false
+                            }
+                        }
+                    }
+                }
+                .allowsHitTesting(false)
+            }
         }
         .frame(height: settings.barHeight)
         .opacity(settings.barOpacity)
@@ -244,7 +330,7 @@ struct BottomBarView: View {
                 SettingsWindowManager.shared.showSettingsWindow()
             }
         }) {
-            Image(systemName: "gear")
+            Image(systemName: "slider.horizontal.3")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(accentGradient)
                 .frame(width: 40, height: 40)
@@ -286,7 +372,7 @@ struct BottomBarView: View {
                 windowManager.hideWindow()
             }
         }) {
-            Image(systemName: "xmark.circle.fill")
+            Image(systemName: "power")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(LinearGradient(
                     colors: [.red, .orange],
@@ -354,7 +440,10 @@ struct BottomBarView: View {
         ThumbnailCard(
             item: item,
             isSelected: selectedItem?.id == item.id,
-            isHovered: hoveredItemID == item.id
+            isHovered: hoveredItemID == item.id,
+            onDoubleClick: {
+                handleDoubleClick(item: item)
+            }
         )
         .frame(height: settings.barHeight - 20)
         .aspectRatio(1.0, contentMode: .fit)
@@ -378,7 +467,7 @@ struct BottomBarView: View {
                 .font(.system(size: 24, weight: .light))
                 .foregroundColor(.secondary.opacity(0.6))
             
-            Text("Keine Bilder im Clipboard")
+            Text("Keine Inhalte im Clipboard")
                 .font(.caption)
                 .foregroundColor(.secondary.opacity(0.8))
         }
@@ -412,7 +501,15 @@ struct BottomBarView: View {
     private func copyItemToPasteboard(_ item: ClipboardItem) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.setData(item.imageData, forType: NSPasteboard.PasteboardType(item.contentType.identifier))
+        
+        if let imageData = item.imageData {
+            pasteboard.setData(imageData, forType: NSPasteboard.PasteboardType(item.contentType.identifier))
+        } else if let textContent = item.textContent {
+            pasteboard.setString(textContent, forType: .string)
+            // Zeige Toast für Text
+            toastMessage = "Text wurde in die Zwischenablage kopiert und kann jetzt in Tools eingefügt werden"
+            showingToast = true
+        }
         
         withAnimation(.easeInOut(duration: 0.2)) {
             selectedItem = item
@@ -423,13 +520,60 @@ struct BottomBarView: View {
     
     private func saveItemToFile(_ item: ClipboardItem) {
         let savePanel = NSSavePanel()
-        savePanel.allowedContentTypes = [item.contentType]
-        savePanel.nameFieldStringValue = "ShotDrop_\(Int(item.timestamp.timeIntervalSince1970))"
         
-        savePanel.begin { result in
-            if result == .OK, let url = savePanel.url {
-                try? item.imageData.write(to: url)
+        if item.isImage {
+            savePanel.allowedContentTypes = [item.contentType]
+            savePanel.nameFieldStringValue = "ShotDrop_\(Int(item.timestamp.timeIntervalSince1970))"
+            
+            savePanel.begin { result in
+                if result == .OK, let url = savePanel.url, let imageData = item.imageData {
+                    try? imageData.write(to: url)
+                }
+            }
+        } else if item.isText {
+            savePanel.allowedContentTypes = [.plainText]
+            savePanel.nameFieldStringValue = "ShotDrop_Text_\(Int(item.timestamp.timeIntervalSince1970)).txt"
+            
+            savePanel.begin { result in
+                if result == .OK, let url = savePanel.url, let textContent = item.textContent {
+                    try? textContent.write(to: url, atomically: true, encoding: .utf8)
+                }
             }
         }
     }
+    
+    private func handleDoubleClick(item: ClipboardItem) {
+        if item.isImage, let imageData = item.imageData {
+            // Öffne Bild in Preview
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ShotDrop_\(UUID().uuidString).png")
+            
+            do {
+                try imageData.write(to: tempURL)
+                NSWorkspace.shared.open(tempURL)
+                
+                // Lösche die temporäre Datei nach 10 Sekunden
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                    try? FileManager.default.removeItem(at: tempURL)
+                }
+            } catch {
+                print("Fehler beim Öffnen des Bildes: \(error)")
+            }
+        } else if item.isText, let textContent = item.textContent {
+            // Öffne Text in TextEdit
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ShotDrop_\(UUID().uuidString).txt")
+            
+            do {
+                try textContent.write(to: tempURL, atomically: true, encoding: .utf8)
+                NSWorkspace.shared.open(tempURL)
+                
+                // Lösche die temporäre Datei nach 10 Sekunden
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                    try? FileManager.default.removeItem(at: tempURL)
+                }
+            } catch {
+                print("Fehler beim Öffnen des Textes: \(error)")
+            }
+        }
+    }
+    
 }

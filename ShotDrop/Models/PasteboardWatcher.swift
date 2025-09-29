@@ -44,6 +44,7 @@ class PasteboardWatcher: ObservableObject {
         guard let items = pasteboard.pasteboardItems else { return }
         
         for item in items {
+            // Prüfe zuerst auf Bilder
             if let imageData = item.data(forType: .png) ?? 
                                item.data(forType: NSPasteboard.PasteboardType("public.jpeg")) ?? 
                                item.data(forType: .tiff) {
@@ -66,12 +67,33 @@ class PasteboardWatcher: ObservableObject {
                 
                 break
             }
+            // Prüfe auf Text
+            else if let text = item.string(forType: .string) {
+                let newItem = ClipboardItem(text: text)
+                addNewItem(newItem)
+                
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .clipboardAutoActivated, object: nil)
+                }
+                
+                break
+            }
         }
     }
     
     private func addNewItem(_ item: ClipboardItem) {
         DispatchQueue.main.async {
-            if !self.clipboardItems.contains(where: { $0.imageData == item.imageData }) {
+            // Prüfe auf Duplikate basierend auf Inhalt
+            let isDuplicate: Bool
+            if let imageData = item.imageData {
+                isDuplicate = self.clipboardItems.contains(where: { $0.imageData == imageData })
+            } else if let textContent = item.textContent {
+                isDuplicate = self.clipboardItems.contains(where: { $0.textContent == textContent })
+            } else {
+                isDuplicate = false
+            }
+            
+            if !isDuplicate {
                 self.clipboardItems.insert(item, at: 0)
                 
                 let maxItems = AppSettings.shared.maxItems
@@ -80,7 +102,8 @@ class PasteboardWatcher: ObservableObject {
                 }
                 
                 self.saveItems()
-                print("📋 Neues Bild hinzugefügt. Gesamt: \(self.clipboardItems.count)")
+                let itemType = item.isImage ? "Bild" : "Text"
+                print("📋 Neues \(itemType) hinzugefügt. Gesamt: \(self.clipboardItems.count)")
             }
         }
     }

@@ -74,8 +74,8 @@ class AppSettings: ObservableObject {
         
         var displayName: String {
             switch self {
-            case .ten: return "Letzte 10"
-            case .hundred: return "Letzte 100"
+            case .ten: return "Letzte 10 Shots"
+            case .hundred: return "Letzte 100 Shots"
             case .unlimited: return "Unbegrenzt"
             }
         }
@@ -115,7 +115,7 @@ class AppSettings: ObservableObject {
         itemSpacing = 12
         cornerRadius = 12
         hideDelay = 3.0
-        autoHideEnabled = false
+        autoHideEnabled = false  // Standard: Leiste bleibt offen
         keepOpenOnIOSCopy = true
         themeMode = .system
     }
