@@ -46,7 +46,7 @@ class SourceDetector {
         var iconImage: NSImage? {
             // Try to get actual app icon first
             if case .app(let bundleId, _) = source {
-                return getAppIcon(for: bundleId)
+                return SourceDetector.shared.getAppIcon(for: bundleId)
             }
             return NSImage(systemSymbolName: icon, accessibilityDescription: nil)
         }
@@ -74,7 +74,8 @@ class SourceDetector {
         let pasteboard = NSPasteboard.general
         
         // Check pasteboard name for Universal Clipboard indicators
-        if let pasteboardName = pasteboard.name?.rawValue {
+        let pasteboardName = pasteboard.name.rawValue
+        if !pasteboardName.isEmpty {
             if pasteboardName.contains("Handoff") || pasteboardName.contains("Universal") {
                 // Try to determine device type from pasteboard properties
                 return detectHandoffDeviceType()
@@ -104,7 +105,7 @@ class SourceDetector {
     private func detectAppSource() -> (bundleId: String, name: String)? {
         // Check running applications and recently active ones
         let workspace = NSWorkspace.shared
-        let runningApps = workspace.runningApplications
+        _ = workspace.runningApplications
         
         // Get the frontmost (most recently active) application
         if let frontmostApp = workspace.frontmostApplication {

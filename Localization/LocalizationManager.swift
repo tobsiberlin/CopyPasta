@@ -109,7 +109,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Letzte 10 Shots",
             .itemLimitHundred: "Letzte 100 Shots",
             .itemLimitUnlimited: "Unbegrenzt",
-            .sourceLabel: "Quelle"
+            .sourceLabel: "Quelle",
+            .ocrFast: "Schnell",
+            .ocrBalanced: "Ausgewogen",
+            .ocrAccurate: "Genau",
+            .ocrError: "OCR Fehler",
+            .ocrInvalidImage: "Ungültiges Bild",
+            .ocrNoTextFound: "Kein Text gefunden",
+            .ocrCancelled: "OCR abgebrochen"
         ],
         .english: [
             .appName: "ShotCast",
@@ -165,7 +172,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Last 10 Shots",
             .itemLimitHundred: "Last 100 Shots",
             .itemLimitUnlimited: "Unlimited",
-            .sourceLabel: "Source"
+            .sourceLabel: "Source",
+            .ocrFast: "Fast",
+            .ocrBalanced: "Balanced",
+            .ocrAccurate: "Accurate",
+            .ocrError: "OCR Error",
+            .ocrInvalidImage: "Invalid Image",
+            .ocrNoTextFound: "No Text Found",
+            .ocrCancelled: "OCR Cancelled"
         ],
         .spanish: [
             .appName: "ShotCast",
@@ -221,7 +235,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Últimos 10 Disparos",
             .itemLimitHundred: "Últimos 100 Disparos",
             .itemLimitUnlimited: "Ilimitado",
-            .sourceLabel: "Fuente"
+            .sourceLabel: "Fuente",
+            .ocrFast: "Rápido",
+            .ocrBalanced: "Equilibrado",
+            .ocrAccurate: "Preciso",
+            .ocrError: "Error OCR",
+            .ocrInvalidImage: "Imagen Inválida",
+            .ocrNoTextFound: "No se Encontró Texto",
+            .ocrCancelled: "OCR Cancelado"
         ],
         .french: [
             .appName: "ShotCast",
@@ -277,7 +298,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "10 Derniers Captures",
             .itemLimitHundred: "100 Derniers Captures",
             .itemLimitUnlimited: "Illimité",
-            .sourceLabel: "Source"
+            .sourceLabel: "Source",
+            .ocrFast: "Rapide",
+            .ocrBalanced: "Équilibré",
+            .ocrAccurate: "Précis",
+            .ocrError: "Erreur OCR",
+            .ocrInvalidImage: "Image Invalide",
+            .ocrNoTextFound: "Aucun Texte Trouvé",
+            .ocrCancelled: "OCR Annulé"
         ],
         .italian: [
             .appName: "ShotCast",
@@ -333,7 +361,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Ultimi 10 Scatti",
             .itemLimitHundred: "Ultimi 100 Scatti",
             .itemLimitUnlimited: "Illimitato",
-            .sourceLabel: "Fonte"
+            .sourceLabel: "Fonte",
+            .ocrFast: "Veloce",
+            .ocrBalanced: "Equilibrato",
+            .ocrAccurate: "Preciso",
+            .ocrError: "Errore OCR",
+            .ocrInvalidImage: "Immagine Non Valida",
+            .ocrNoTextFound: "Nessun Testo Trovato",
+            .ocrCancelled: "OCR Annullato"
         ],
         .portuguese: [
             .appName: "ShotCast",
@@ -389,7 +424,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Últimos 10 Disparos",
             .itemLimitHundred: "Últimos 100 Disparos",
             .itemLimitUnlimited: "Ilimitado",
-            .sourceLabel: "Fonte"
+            .sourceLabel: "Fonte",
+            .ocrFast: "Rápido",
+            .ocrBalanced: "Equilibrado",
+            .ocrAccurate: "Preciso",
+            .ocrError: "Erro OCR",
+            .ocrInvalidImage: "Imagem Inválida",
+            .ocrNoTextFound: "Nenhum Texto Encontrado",
+            .ocrCancelled: "OCR Cancelado"
         ],
         .dutch: [
             .appName: "ShotCast",
@@ -445,7 +487,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Laatste 10 Shots",
             .itemLimitHundred: "Laatste 100 Shots",
             .itemLimitUnlimited: "Onbeperkt",
-            .sourceLabel: "Bron"
+            .sourceLabel: "Bron",
+            .ocrFast: "Snel",
+            .ocrBalanced: "Uitgebalanceerd",
+            .ocrAccurate: "Nauwkeurig",
+            .ocrError: "OCR Fout",
+            .ocrInvalidImage: "Ongeldige Afbeelding",
+            .ocrNoTextFound: "Geen Tekst Gevonden",
+            .ocrCancelled: "OCR Geannuleerd"
         ],
         .russian: [
             .appName: "ShotCast",
@@ -501,7 +550,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "Последние 10 Снимков",
             .itemLimitHundred: "Последние 100 Снимков",
             .itemLimitUnlimited: "Неограниченно",
-            .sourceLabel: "Источник"
+            .sourceLabel: "Источник",
+            .ocrFast: "Быстро",
+            .ocrBalanced: "Сбалансированно",
+            .ocrAccurate: "Точно",
+            .ocrError: "Ошибка OCR",
+            .ocrInvalidImage: "Недействительное Изображение",
+            .ocrNoTextFound: "Текст Не Найден",
+            .ocrCancelled: "OCR Отменено"
         ],
         .chinese: [
             .appName: "ShotCast",
@@ -557,7 +613,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "最近10个截图",
             .itemLimitHundred: "最近100个截图",
             .itemLimitUnlimited: "无限制",
-            .sourceLabel: "来源"
+            .sourceLabel: "来源",
+            .ocrFast: "快速",
+            .ocrBalanced: "平衡",
+            .ocrAccurate: "精确",
+            .ocrError: "OCR错误",
+            .ocrInvalidImage: "无效图像",
+            .ocrNoTextFound: "未找到文本",
+            .ocrCancelled: "OCR已取消"
         ],
         .japanese: [
             .appName: "ShotCast",
@@ -613,7 +676,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "最新の10ショット",
             .itemLimitHundred: "最新の100ショット",
             .itemLimitUnlimited: "制限なし",
-            .sourceLabel: "ソース"
+            .sourceLabel: "ソース",
+            .ocrFast: "高速",
+            .ocrBalanced: "バランス",
+            .ocrAccurate: "正確",
+            .ocrError: "OCRエラー",
+            .ocrInvalidImage: "無効な画像",
+            .ocrNoTextFound: "テキストが見つかりません",
+            .ocrCancelled: "OCRがキャンセルされました"
         ],
         .korean: [
             .appName: "ShotCast",
@@ -669,7 +739,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "최근 10개 샷",
             .itemLimitHundred: "최근 100개 샷",
             .itemLimitUnlimited: "무제한",
-            .sourceLabel: "소스"
+            .sourceLabel: "소스",
+            .ocrFast: "빠름",
+            .ocrBalanced: "균형",
+            .ocrAccurate: "정확",
+            .ocrError: "OCR 오류",
+            .ocrInvalidImage: "잘못된 이미지",
+            .ocrNoTextFound: "텍스트를 찾을 수 없음",
+            .ocrCancelled: "OCR 취소됨"
         ],
         .arabic: [
             .appName: "ShotCast",
@@ -725,7 +802,14 @@ class LocalizationManager: ObservableObject {
             .itemLimitTen: "آخر 10 لقطات",
             .itemLimitHundred: "آخر 100 لقطة",
             .itemLimitUnlimited: "غير محدود",
-            .sourceLabel: "المصدر"
+            .sourceLabel: "المصدر",
+            .ocrFast: "سريع",
+            .ocrBalanced: "متوازن",
+            .ocrAccurate: "دقيق",
+            .ocrError: "خطأ في OCR",
+            .ocrInvalidImage: "صورة غير صالحة",
+            .ocrNoTextFound: "لم يتم العثور على نص",
+            .ocrCancelled: "تم إلغاء OCR"
         ]
     ]
 }
@@ -785,6 +869,13 @@ enum LocalizationKey: String {
     case itemLimitHundred = "itemLimitHundred"
     case itemLimitUnlimited = "itemLimitUnlimited"
     case sourceLabel = "sourceLabel"
+    case ocrFast = "ocrFast"
+    case ocrBalanced = "ocrBalanced"
+    case ocrAccurate = "ocrAccurate"
+    case ocrError = "ocrError"
+    case ocrInvalidImage = "ocrInvalidImage"
+    case ocrNoTextFound = "ocrNoTextFound"
+    case ocrCancelled = "ocrCancelled"
 }
 
 // MARK: - String Extension for Easy Usage

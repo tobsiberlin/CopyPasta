@@ -15,7 +15,7 @@ class OCRManager: ObservableObject {
     private var currentRequest: VNImageRequestHandler?
     
     struct OCRResult: Identifiable, Codable {
-        let id = UUID()
+        var id = UUID()
         let text: String
         let confidence: Float
         let detectedLanguage: String
@@ -33,19 +33,19 @@ class OCRManager: ObservableObject {
     enum OCRAccuracy {
         case fast, balanced, accurate
         
-        var recognitionLevel: VNRequestRevision {
+        var recognitionLevel: VNRequestTextRecognitionLevel {
             switch self {
-            case .fast: return VNRecognizeTextRequestRevision1
-            case .balanced: return VNRecognizeTextRequestRevision2
-            case .accurate: return VNRecognizeTextRequestRevision3
+            case .fast: return .fast
+            case .balanced: return .accurate
+            case .accurate: return .accurate
             }
         }
         
         var displayName: String {
             switch self {
-            case .fast: return String(localized: .ocrFast)
-            case .balanced: return String(localized: .ocrBalanced)
-            case .accurate: return String(localized: .ocrAccurate)
+            case .fast: return LocalizationManager.shared.localizedString(.ocrFast)
+            case .balanced: return LocalizationManager.shared.localizedString(.ocrBalanced)
+            case .accurate: return LocalizationManager.shared.localizedString(.ocrAccurate)
             }
         }
     }
@@ -320,13 +320,13 @@ enum OCRError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidImage:
-            return String(localized: .ocrInvalidImage)
+            return LocalizationManager.shared.localizedString(.ocrInvalidImage)
         case .processingError(let message):
-            return String(localized: .ocrProcessingError) + ": \(message)"
+            return LocalizationManager.shared.localizedString(.ocrError) + ": \(message)"
         case .noTextFound:
-            return String(localized: .ocrNoTextFound)
+            return LocalizationManager.shared.localizedString(.ocrNoTextFound)
         case .operationCancelled:
-            return String(localized: .ocrCancelled)
+            return LocalizationManager.shared.localizedString(.ocrCancelled)
         }
     }
 }

@@ -9,10 +9,11 @@
 /* Begin PBXBuildFile section */
 		5FF1B4AD2E8A95BC00D84A65 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */; };
 		5FF1B4B12E8A971500D84A65 /* ModernSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */; };
-		5FF1B4B32E8A99A700D84A65 /* DragManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B22E8A99A700D84A65 /* DragManager.swift */; };
-		5FF1B4B62E8A9DB800D84A65 /* SourceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B52E8A9DB800D84A65 /* SourceDetector.swift */; };
-		5FF1B4B72E8A9DB800D84A65 /* OCRManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B42E8A9DB800D84A65 /* OCRManager.swift */; };
-		5FF1B4B92E8A9FFE00D84A65 /* WindowSnappingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B82E8A9FFE00D84A65 /* WindowSnappingManager.swift */; };
+		5FF1B4BF2E8AA7EE00D84A65 /* ReliableDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4BE2E8AA7EE00D84A65 /* ReliableDataManager.swift */; };
+		5FF1B4C42E8AAD2100D84A65 /* WindowSnappingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4C32E8AAD2100D84A65 /* WindowSnappingManager.swift */; };
+		5FF1B4C52E8AAD2100D84A65 /* DragManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4C02E8AAD2100D84A65 /* DragManager.swift */; };
+		5FF1B4C62E8AAD2100D84A65 /* OCRManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4C12E8AAD2100D84A65 /* OCRManager.swift */; };
+		5FF1B4C72E8AAD2100D84A65 /* SourceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4C22E8AAD2100D84A65 /* SourceDetector.swift */; };
 		A1234567890ABCDEF001 /* ShotCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF002 /* ShotCastApp.swift */; };
 		A1234567890ABCDEF003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF004 /* ContentView.swift */; };
 		A1234567890ABCDEF005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF006 /* Assets.xcassets */; };
@@ -31,10 +32,11 @@
 /* Begin PBXFileReference section */
 		5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
 		5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernSettingsView.swift; sourceTree = "<group>"; };
-		5FF1B4B22E8A99A700D84A65 /* DragManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragManager.swift; sourceTree = "<group>"; };
-		5FF1B4B42E8A9DB800D84A65 /* OCRManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRManager.swift; sourceTree = "<group>"; };
-		5FF1B4B52E8A9DB800D84A65 /* SourceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDetector.swift; sourceTree = "<group>"; };
-		5FF1B4B82E8A9FFE00D84A65 /* WindowSnappingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowSnappingManager.swift; sourceTree = "<group>"; };
+		5FF1B4BE2E8AA7EE00D84A65 /* ReliableDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReliableDataManager.swift; sourceTree = "<group>"; };
+		5FF1B4C02E8AAD2100D84A65 /* DragManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragManager.swift; sourceTree = "<group>"; };
+		5FF1B4C12E8AAD2100D84A65 /* OCRManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRManager.swift; sourceTree = "<group>"; };
+		5FF1B4C22E8AAD2100D84A65 /* SourceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDetector.swift; sourceTree = "<group>"; };
+		5FF1B4C32E8AAD2100D84A65 /* WindowSnappingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowSnappingManager.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF002 /* ShotCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotCastApp.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -83,10 +85,6 @@
 		A1234567890ABCDEF023 /* ShotCast */ = {
 			isa = PBXGroup;
 			children = (
-				5FF1B4B82E8A9FFE00D84A65 /* WindowSnappingManager.swift */,
-				5FF1B4B42E8A9DB800D84A65 /* OCRManager.swift */,
-				5FF1B4B52E8A9DB800D84A65 /* SourceDetector.swift */,
-				5FF1B4B22E8A99A700D84A65 /* DragManager.swift */,
 				A1234567890ABCDEF002 /* ShotCastApp.swift */,
 				A1234567890ABCDEF004 /* ContentView.swift */,
 				A1234567890ABCDEF025 /* Views */,
@@ -133,6 +131,11 @@
 		A1234567890ABCDEF027 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				5FF1B4C02E8AAD2100D84A65 /* DragManager.swift */,
+				5FF1B4C12E8AAD2100D84A65 /* OCRManager.swift */,
+				5FF1B4C22E8AAD2100D84A65 /* SourceDetector.swift */,
+				5FF1B4C32E8AAD2100D84A65 /* WindowSnappingManager.swift */,
+				5FF1B4BE2E8AA7EE00D84A65 /* ReliableDataManager.swift */,
 				A1234567890ABCDEF029 /* Extensions */,
 			);
 			path = Utils;
@@ -225,21 +228,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1234567890ABCDEF003 /* ContentView.swift in Sources */,
-				5FF1B4B32E8A99A700D84A65 /* DragManager.swift in Sources */,
 				A1234567890ABCDEF001 /* ShotCastApp.swift in Sources */,
 				A1234567890ABCDEF009 /* PasteboardWatcher.swift in Sources */,
 				A1234567890ABCDEF00B /* WindowManager.swift in Sources */,
 				5FF1B4AD2E8A95BC00D84A65 /* LocalizationManager.swift in Sources */,
+				5FF1B4C42E8AAD2100D84A65 /* WindowSnappingManager.swift in Sources */,
+				5FF1B4C52E8AAD2100D84A65 /* DragManager.swift in Sources */,
+				5FF1B4C62E8AAD2100D84A65 /* OCRManager.swift in Sources */,
+				5FF1B4C72E8AAD2100D84A65 /* SourceDetector.swift in Sources */,
 				A1234567890ABCDEF00D /* BottomBarView.swift in Sources */,
 				A1234567890ABCDEF00F /* ThumbnailCard.swift in Sources */,
 				A1234567890ABCDEF011 /* AppSettings.swift in Sources */,
 				A1234567890ABCDEF013 /* SettingsView.swift in Sources */,
 				5FF1B4B12E8A971500D84A65 /* ModernSettingsView.swift in Sources */,
 				A1234567890ABCDEF015 /* SettingsWindowManager.swift in Sources */,
-				5FF1B4B92E8A9FFE00D84A65 /* WindowSnappingManager.swift in Sources */,
+				5FF1B4BF2E8AA7EE00D84A65 /* ReliableDataManager.swift in Sources */,
 				A1234567890ABCDEF017 /* ViewExtensions.swift in Sources */,
-				5FF1B4B62E8A9DB800D84A65 /* SourceDetector.swift in Sources */,
-				5FF1B4B72E8A9DB800D84A65 /* OCRManager.swift in Sources */,
 				A1234567890ABCDEF019 /* ClipboardItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
