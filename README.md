@@ -312,7 +312,7 @@ open ShotCast.xcodeproj
 
 **Proprietäre kommerzielle Software** - Alle Rechte vorbehalten.
 
-Copyright © 2024 Tobias Mattern. Dieses Projekt ist für kommerzielle Zwecke entwickelt und nicht unter Open Source Lizenz verfügbar.
+Copyright © 2025 Tobias Mattern. Dieses Projekt ist für kommerzielle Zwecke entwickelt und nicht unter Open Source Lizenz verfügbar.
 
 ---
 

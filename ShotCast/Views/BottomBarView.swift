@@ -24,32 +24,45 @@ struct BottomBarView: View {
     
     private var glassBackground: some View {
         ZStack {
-            // Base blur layer
+            // Base blur layer with enhanced material
             VisualEffectView(material: .popover, blendingMode: .behindWindow)
-                .opacity(0.8)
+                .opacity(0.95)
             
-            // Subtle gradient overlay
+            // Colorful gradient overlay
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color.primary.opacity(0.02),
-                    Color.primary.opacity(0.05)
+                    Color.accentColor.opacity(0.08),
+                    Color.purple.opacity(0.05),
+                    Color.blue.opacity(0.05)
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             
-            // Border highlight
+            // Ambient light effect
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color.accentColor.opacity(0.1),
+                    Color.clear
+                ]),
+                center: .topLeading,
+                startRadius: 50,
+                endRadius: 300
+            )
+            
+            // Enhanced border with color
             RoundedRectangle(cornerRadius: settings.cornerRadius)
                 .stroke(
                     LinearGradient(
                         colors: [
-                            Color.primary.opacity(0.15),
-                            Color.primary.opacity(0.05)
+                            Color.accentColor.opacity(0.3),
+                            Color.purple.opacity(0.2),
+                            Color.blue.opacity(0.2)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: 0.5
+                    lineWidth: 1
                 )
         }
     }
@@ -101,22 +114,85 @@ struct BottomBarView: View {
     
     var body: some View {
         ZStack {
-            VStack(spacing: 0) {
-                // Top bar with controls
-                topControlBar
-                    .frame(height: 32)
+            // Resize handles at edges
+            HStack(spacing: 0) {
+                // Left edge resize
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: 10)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                windowManager.resizeWindowHorizontally(delta: -value.translation.width)
+                            }
+                    )
+                    .onHover { isHovered in
+                        if isHovered {
+                            NSCursor.resizeLeftRight.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
                 
-                resizeArea
-                    .frame(height: 8)
+                VStack(spacing: 0) {
+                    // Top edge resize
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 10)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
+                                    settings.barHeight = newHeight
+                                    windowManager.updateWindowFrame()
+                                }
+                        )
+                        .onHover { isHovered in
+                            if isHovered {
+                                NSCursor.resizeUpDown.push()
+                            } else {
+                                NSCursor.pop()
+                            }
+                        }
+                    
+                    // Main content
+                    VStack(spacing: 0) {
+                        // Top bar with controls
+                        topControlBar
+                            .frame(height: 32)
+                        
+                        mainContent
+                    }
+                    .background(
+                        glassBackground
+                            .cornerRadius(settings.cornerRadius)
+                            .shadow(color: Color.accentColor.opacity(0.2), radius: 30, x: 0, y: 10)
+                            .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
+                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                    )
+                }
                 
-                mainContent
+                // Right edge resize
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: 10)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                windowManager.resizeWindowHorizontally(delta: value.translation.width)
+                            }
+                    )
+                    .onHover { isHovered in
+                        if isHovered {
+                            NSCursor.resizeLeftRight.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
             }
-            .background(
-                glassBackground
-                    .cornerRadius(settings.cornerRadius)
-                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
-                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-            )
             
             // Toast Overlay
             if showingToast {
@@ -228,67 +304,7 @@ struct BottomBarView: View {
             }
     }
     
-    private var resizeArea: some View {
-        HStack(spacing: 0) {
-            // Links-Resize für Breite
-            Rectangle()
-                .fill(Color.clear)
-                .contentShape(Rectangle())
-                .frame(width: 20)
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            windowManager.resizeWindowHorizontally(delta: -value.translation.width)
-                        }
-                )
-                .onHover { isHovered in
-                    if isHovered {
-                        NSCursor.resizeLeftRight.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
-            
-            // Mitte-Resize für Höhe
-            Rectangle()
-                .fill(Color.clear)
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
-                            settings.barHeight = newHeight
-                            windowManager.updateWindowFrame()
-                        }
-                )
-                .onHover { isHovered in
-                    if isHovered {
-                        NSCursor.resizeUpDown.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
-            
-            // Rechts-Resize für Breite
-            Rectangle()
-                .fill(Color.clear)
-                .contentShape(Rectangle())
-                .frame(width: 20)
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            windowManager.resizeWindowHorizontally(delta: value.translation.width)
-                        }
-                )
-                .onHover { isHovered in
-                    if isHovered {
-                        NSCursor.resizeLeftRight.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
-        }
-    }
+    // Removed - now integrated into main body
     
     private var topControlBar: some View {
         HStack {
@@ -327,7 +343,7 @@ struct BottomBarView: View {
             }
             
             Spacer()
-                .frame(width: 12)
+                .frame(width: dynamicPadding)
         }
     }
     
@@ -404,20 +420,72 @@ struct BottomBarView: View {
     }
     
     private var itemScrollView: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            itemsStack
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                itemsStack
+            }
+            .clipped()
+            .overlay(alignment: .trailing) {
+                // Right-side scroll trigger area
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: 50)
+                    .contentShape(Rectangle())
+                    .onHover { isHovered in
+                        if isHovered && filteredItems.count > 3 {
+                            // Scroll to the right (showing older items)
+                            if let lastItem = filteredItems.last {
+                                withAnimation(.easeInOut(duration: 0.8)) {
+                                    proxy.scrollTo(lastItem.id, anchor: .trailing)
+                                }
+                            }
+                        }
+                    }
+            }
+            .overlay(alignment: .leading) {
+                // Left-side scroll trigger area (back to newest)
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: 50)
+                    .contentShape(Rectangle())
+                    .onHover { isHovered in
+                        if isHovered && filteredItems.count > 3 {
+                            // Scroll to the left (showing newest items)
+                            if let firstItem = filteredItems.first {
+                                withAnimation(.easeInOut(duration: 0.8)) {
+                                    proxy.scrollTo(firstItem.id, anchor: .leading)
+                                }
+                            }
+                        }
+                    }
+            }
         }
-        .clipped()
     }
     
     private var itemsStack: some View {
-        LazyHStack(spacing: settings.itemSpacing) {
+        LazyHStack(spacing: dynamicItemSpacing) {
             ForEach(filteredItems) { item in
                 itemCard(item: item)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .padding(.horizontal, dynamicPadding)
+        .padding(.vertical, dynamicVerticalPadding)
+    }
+    
+    // Dynamic padding based on bar height
+    private var dynamicPadding: CGFloat {
+        let ratio = settings.barHeight / 120.0 // 120 is default height
+        return max(8, 16 * ratio)
+    }
+    
+    private var dynamicVerticalPadding: CGFloat {
+        let ratio = settings.barHeight / 120.0
+        return max(5, 10 * ratio)
+    }
+    
+    private var dynamicItemSpacing: CGFloat {
+        let ratio = settings.barHeight / 120.0
+        return max(6, settings.itemSpacing * ratio)
     }
     
     private func itemCard(item: ClipboardItem) -> some View {
@@ -506,24 +574,76 @@ struct BottomBarView: View {
     }
     
     private func saveItemToFile(_ item: ClipboardItem) {
-        let savePanel = NSSavePanel()
-        
-        if item.isImage {
-            savePanel.allowedContentTypes = [item.contentType]
-            savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970))"
+        // Ensure we're on the main thread for UI operations
+        DispatchQueue.main.async {
+            let savePanel = NSSavePanel()
             
-            savePanel.begin { result in
-                if result == .OK, let url = savePanel.url, let imageData = item.imageData {
-                    try? imageData.write(to: url)
+            if item.isImage {
+                savePanel.allowedContentTypes = [item.contentType]
+                savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970))"
+                
+                savePanel.begin { result in
+                    if result == .OK, let url = savePanel.url, let imageData = item.imageData {
+                        do {
+                            try imageData.write(to: url)
+                            self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                            self.showingToast = true
+                        } catch {
+                            print("Error saving image: \(error)")
+                        }
+                    }
                 }
-            }
-        } else if item.isText {
-            savePanel.allowedContentTypes = [.plainText]
-            savePanel.nameFieldStringValue = "ShotCast_Text_\(Int(item.timestamp.timeIntervalSince1970)).txt"
-            
-            savePanel.begin { result in
-                if result == .OK, let url = savePanel.url, let textContent = item.textContent {
-                    try? textContent.write(to: url, atomically: true, encoding: .utf8)
+            } else if item.isText {
+                savePanel.allowedContentTypes = [.plainText]
+                savePanel.nameFieldStringValue = "ShotCast_Text_\(Int(item.timestamp.timeIntervalSince1970)).txt"
+                
+                savePanel.begin { result in
+                    if result == .OK, let url = savePanel.url, let textContent = item.textContent {
+                        do {
+                            try textContent.write(to: url, atomically: true, encoding: .utf8)
+                            self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                            self.showingToast = true
+                        } catch {
+                            print("Error saving text: \(error)")
+                        }
+                    }
+                }
+            } else {
+                // Handle other file types (like files copied to clipboard)
+                if let data = item.fileData {
+                    savePanel.allowedContentTypes = [item.contentType]
+                    let extension = item.contentType.preferredFilenameExtension ?? "file"
+                    savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970)).\(extension)"
+                    
+                    savePanel.begin { result in
+                        if result == .OK, let url = savePanel.url {
+                            do {
+                                try data.write(to: url)
+                                self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                                self.showingToast = true
+                            } catch {
+                                print("Error saving file: \(error)")
+                            }
+                        }
+                    }
+                } else if let filePath = item.filePath {
+                    // If we have a file path, copy the file
+                    savePanel.allowedContentTypes = [item.contentType]
+                    let extension = item.contentType.preferredFilenameExtension ?? "file"
+                    savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970)).\(extension)"
+                    
+                    savePanel.begin { result in
+                        if result == .OK, let destinationURL = savePanel.url {
+                            do {
+                                let sourceURL = URL(fileURLWithPath: filePath)
+                                try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+                                self.toastMessage = self.localizationManager.localizedString(.savedSuccessfully)
+                                self.showingToast = true
+                            } catch {
+                                print("Error copying file: \(error)")
+                            }
+                        }
+                    }
                 }
             }
         }

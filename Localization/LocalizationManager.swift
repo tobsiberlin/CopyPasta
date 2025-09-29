@@ -67,7 +67,7 @@ class LocalizationManager: ObservableObject {
             .settingsLanguage: "Sprache",
             .settingsTheme: "Thema",
             .settingsMaxItems: "Maximale Anzahl Items",
-            .settingsBarHeight: "Balkenhöhe",
+            .settingsBarHeight: "Höhe der Leiste",
             .settingsBarOpacity: "Transparenz",
             .settingsCornerRadius: "Eckenradius",
             .settingsItemSpacing: "Elementabstand",

@@ -78,44 +78,45 @@ struct ClipboardItem: Identifiable, Codable {
     let contentType: UTType
     let timestamp: Date
     var isFavorite: Bool = false
-    var sourceInfo: SourceDetector.SourceInfo? {
-        // Re-detect source info on each access for now
-        // In a real app, you'd want to store and persist this
-        return SourceDetector.shared.detectSource()
-    }
+    var sourceInfo: SourceDetector.SourceInfo?
     
     enum CodingKeys: CodingKey {
-        case content, contentType, timestamp, isFavorite
+        case content, contentType, timestamp, isFavorite, sourceInfo
     }
     
     init(imageData: Data, contentType: UTType, timestamp: Date = Date()) {
         self.content = .image(data: imageData)
         self.contentType = contentType
         self.timestamp = timestamp
+        self.sourceInfo = SourceDetector.shared.detectSource()
     }
     
     init(text: String, timestamp: Date = Date()) {
         self.content = .text(content: text)
         self.contentType = .plainText
         self.timestamp = timestamp
+        self.sourceInfo = SourceDetector.shared.detectSource()
     }
     
     init(fileData: Data, fileName: String, mimeType: String, timestamp: Date = Date()) {
         self.content = .file(data: fileData, name: fileName, mimeType: mimeType)
         self.contentType = UTType(mimeType: mimeType) ?? .data
         self.timestamp = timestamp
+        self.sourceInfo = SourceDetector.shared.detectSource()
     }
     
     init(url: String, timestamp: Date = Date()) {
         self.content = .url(urlString: url)
         self.contentType = .url
         self.timestamp = timestamp
+        self.sourceInfo = SourceDetector.shared.detectSource()
     }
     
     init(rtfData: Data, timestamp: Date = Date()) {
         self.content = .rtf(data: rtfData)
         self.contentType = .rtf
         self.timestamp = timestamp
+        self.sourceInfo = SourceDetector.shared.detectSource()
     }
     
     init(htmlContent: String, timestamp: Date = Date()) {

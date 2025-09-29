@@ -108,7 +108,7 @@ struct ModernSettingsView: View {
                 .font(.caption2)
                 .foregroundColor(Color(NSColor.tertiaryLabelColor))
             
-            Text("© 2024")
+            Text("© \(Calendar.current.component(.year, from: Date()))")
                 .font(.caption2)
                 .foregroundColor(Color(NSColor.tertiaryLabelColor))
         }

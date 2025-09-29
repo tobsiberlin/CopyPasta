@@ -37,10 +37,11 @@ struct ThumbnailCard: View {
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 12) // Leicht abgerundet
                 .fill(.ultraThinMaterial)
+                .aspectRatio(1.0, contentMode: .fit) // Quadratisch
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 12) // Leicht abgerundet
                         .stroke(borderColor, lineWidth: borderWidth)
                         .animation(.easeInOut(duration: 0.2), value: borderWidth)
                         .animation(.easeInOut(duration: 0.2), value: borderColor)
@@ -53,8 +54,8 @@ struct ThumbnailCard: View {
                         Image(nsImage: nsImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                            .padding(4)
+                            .clipShape(RoundedRectangle(cornerRadius: 10)) // Leicht abgerundet, passend zur Card
+                            .padding(6)
                     } else {
                         fileTypeIconView
                     }
