@@ -114,35 +114,40 @@ struct BottomBarView: View {
     
     var body: some View {
         ZStack {
-            // Main content with glass background
-            VStack(spacing: 0) {
-                // Top bar with controls
-                topControlBar
-                    .frame(height: 32)
-                
-                mainContent
+            // Simple clean design like Paste
+            if filteredItems.isEmpty {
+                emptyStateView
+                    .frame(height: settings.barHeight)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 8) { // Fester Abstand wie bei Paste
+                        ForEach(filteredItems) { item in
+                            itemCard(item: item)
+                        }
+                    }
+                    .padding(.horizontal, 12) // Weniger Padding
+                    .padding(.vertical, 8) // Minimal padding
+                }
+                .frame(height: settings.barHeight)
+                .background(
+                    // Paste-ähnlicher sauberer Hintergrund
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.regularMaterial)
+                        .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                )
             }
-            .background(
-                glassBackground
-                    .cornerRadius(settings.cornerRadius)
-                    .shadow(color: Color.accentColor.opacity(0.2), radius: 30, x: 0, y: 10)
-                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 8)
-                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-            )
-            .padding(.horizontal, 10) // Platz für horizontale Resize-Handles
-            .padding(.top, 10) // Platz für Top-Resize-Handle
             
-            // Resize handles as overlay (always on top)
+            // Resize handles (invisible overlays)
             VStack(spacing: 0) {
-                // Top edge resize
+                // Top resize
                 Rectangle()
                     .fill(Color.clear)
-                    .frame(height: 10)
+                    .frame(height: 8)
                     .contentShape(Rectangle())
                     .gesture(
                         DragGesture()
                             .onChanged { value in
-                                let newHeight = max(60, min(200, settings.barHeight - value.translation.height))
+                                let newHeight = max(60, min(120, settings.barHeight - value.translation.height))
                                 settings.barHeight = newHeight
                                 windowManager.updateWindowFrame()
                             }
@@ -159,10 +164,10 @@ struct BottomBarView: View {
             }
             
             HStack(spacing: 0) {
-                // Left edge resize
+                // Left resize  
                 Rectangle()
                     .fill(Color.clear)
-                    .frame(width: 10)
+                    .frame(width: 8)
                     .contentShape(Rectangle())
                     .gesture(
                         DragGesture()
@@ -180,10 +185,10 @@ struct BottomBarView: View {
                 
                 Spacer()
                 
-                // Right edge resize
+                // Right resize
                 Rectangle()
                     .fill(Color.clear)
-                    .frame(width: 10)
+                    .frame(width: 8)
                     .contentShape(Rectangle())
                     .gesture(
                         DragGesture()
@@ -266,13 +271,6 @@ struct BottomBarView: View {
         }
         .frame(height: settings.barHeight)
         .opacity(settings.barOpacity)
-        .onHover { isHovered in
-            if isHovered {
-                windowManager.handleMouseEntered()
-            } else {
-                windowManager.handleMouseExited()
-            }
-        }
         .preferredColorScheme(preferredColorScheme)
     }
     
@@ -506,14 +504,13 @@ struct BottomBarView: View {
                 showOCRToast(with: extractedText)
             }
         )
-        .frame(height: settings.barHeight - 20)
-        .aspectRatio(1.0, contentMode: .fit)
+        .frame(width: settings.barHeight - 16, height: settings.barHeight - 16) // Quadratisch wie bei Paste
         .onTapGesture {
             selectedItem = item
             copyItemToPasteboard(item)
         }
         .onHover { isHovered in
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 hoveredItemID = isHovered ? item.id : nil
             }
         }

@@ -97,7 +97,7 @@ class AppSettings: ObservableObject {
     }
     
     private init() {
-        self.barHeight = UserDefaults.standard.object(forKey: "barHeight") as? CGFloat ?? 120
+        self.barHeight = UserDefaults.standard.object(forKey: "barHeight") as? CGFloat ?? 80
         self.maxItems = UserDefaults.standard.object(forKey: "maxItems") as? Int ?? 100
         self.autoShowOnCopy = UserDefaults.standard.object(forKey: "autoShowOnCopy") as? Bool ?? true
         self.barOpacity = UserDefaults.standard.object(forKey: "barOpacity") as? Double ?? 0.95
@@ -110,7 +110,7 @@ class AppSettings: ObservableObject {
     }
     
     func resetToDefaults() {
-        barHeight = 120
+        barHeight = 80
         maxItems = 100
         autoShowOnCopy = true
         barOpacity = 0.95

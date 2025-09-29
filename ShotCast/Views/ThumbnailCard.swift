@@ -37,25 +37,24 @@ struct ThumbnailCard: View {
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12) // Leicht abgerundet
-                .fill(Color(NSColor.controlBackgroundColor)) // Vollständig opak
-                .aspectRatio(1.0, contentMode: .fit) // Quadratisch
+            // Paste-ähnlicher sauberer Hintergrund
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.white) // Komplett weiß wie bei Paste
+                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12) // Leicht abgerundet
-                        .stroke(borderColor, lineWidth: borderWidth)
-                        .animation(.easeInOut(duration: 0.2), value: borderWidth)
-                        .animation(.easeInOut(duration: 0.2), value: borderColor)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
                 )
             
-            // Dynamische Darstellung basierend auf Dateityp
+            // Saubere Bild-Darstellung wie bei Paste
             Group {
                 if item.isImage {
                     if let imageData = item.imageData, let nsImage = NSImage(data: imageData) {
                         Image(nsImage: nsImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .clipShape(RoundedRectangle(cornerRadius: 10)) // Leicht abgerundet, passend zur Card
-                            .padding(6)
+                            .clipShape(RoundedRectangle(cornerRadius: 6)) // Weniger abgerundet
+                            .padding(3) // Minimales Padding
                     } else {
                         fileTypeIconView
                     }
@@ -100,60 +99,57 @@ struct ThumbnailCard: View {
                 .padding(4)
             }
             
-            // Source-Badge und Favorit (wie im Screenshot)
-            VStack {
+            // Sichtbare Source-Badges und Info wie bei Paste
+            VStack(alignment: .leading, spacing: 0) {
                 HStack {
                     // Favorit-Icon links oben
                     if item.isFavorite {
                         Image(systemName: "heart.fill")
                             .foregroundColor(.red)
-                            .font(.caption2)
-                            .background(
-                                Circle()
-                                    .fill(.ultraThickMaterial)
-                                    .frame(width: 20, height: 20)
-                            )
+                            .font(.system(size: 10))
+                            .padding(2)
+                            .background(Circle().fill(.white).shadow(radius: 1))
                     }
                     
                     Spacer()
                     
-                    // App-Source-Badge rechts oben (Shottr "S", VS Code "</>", etc.)
+                    // App-Source-Badge rechts oben - IMMER SICHTBAR
                     if let sourceInfo = item.sourceInfo,
                        let sourceBadge = sourceInfo.badge {
                         Text(sourceBadge)
-                            .font(.caption2)
-                            .fontWeight(.bold)
+                            .font(.system(size: 8, weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 18, height: 18)
+                            .frame(width: 16, height: 16)
                             .background(
                                 Circle()
-                                    .fill(sourceInfo.badgeColor)
-                                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                                    .fill(Color.red) // Wie bei Paste - roter Kreis
+                                    .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                             )
-                            .help("\(LocalizationManager.shared.localizedString(.sourceLabel)): \(sourceInfo.displayName)")
                     }
                 }
+                .padding(.horizontal, 4)
+                .padding(.top, 4)
+                
                 Spacer()
                 
-                // Dateityp-Indikator unten rechts
+                // Dateityp-Badge unten links wie bei Paste
                 HStack {
-                    Spacer()
                     Text(getFileTypeIndicator())
-                        .font(.caption2)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 6)
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 4)
                         .padding(.vertical, 2)
                         .background(
                             Capsule()
-                                .fill(.black.opacity(0.6))
-                                .overlay(
-                                    Capsule()
-                                        .stroke(.white.opacity(0.3), lineWidth: 0.5)
-                                )
+                                .fill(.white.opacity(0.9))
+                                .shadow(radius: 1)
                         )
+                    
+                    Spacer()
                 }
+                .padding(.horizontal, 4)
+                .padding(.bottom, 4)
             }
-            .padding(4)
         }
         .scaleEffect(isSelected ? 1.05 : (isHovered ? 1.02 : 1.0))
         .shadow(color: isSelected ? .accentColor.opacity(0.3) : .clear, radius: 8)
