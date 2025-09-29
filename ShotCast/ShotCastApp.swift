@@ -77,9 +77,6 @@ struct StatusBarIconView: View {
         
         image.lockFocus()
         
-        // Create professional icon design
-        let rect = NSRect(origin: .zero, size: size)
-        
         // Set up graphics context
         guard let context = NSGraphicsContext.current?.cgContext else {
             image.unlockFocus()
@@ -118,6 +115,7 @@ struct StatusBarIconView: View {
         
         return image
     }
+    
 }
 
 struct MenuBarView: View {
