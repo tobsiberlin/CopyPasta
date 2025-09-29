@@ -1,15 +1,15 @@
-# CopyPasta - Der automatische Universal Clipboard Manager
+# ShotCast - Der automatische Universal Clipboard Manager
 
 <p align="center">
-  <img src="assets/logo.png" width="120" height="120" alt="CopyPasta Logo">
+  <img src="assets/logo.png" width="120" height="120" alt="ShotCast Logo">
 </p>
 
-CopyPasta ist ein nativer macOS Universal Clipboard Manager, der automatisch aktiviert wird, wenn Sie Bilder von Ihrem iPhone kopieren. Inspiriert vom eleganten Design der Paste App, bietet CopyPasta eine moderne und intuitive Oberfläche für die Verwaltung Ihrer kopierten Bilder.
+ShotCast ist ein nativer macOS Universal Clipboard Manager, der automatisch aktiviert wird, wenn Sie Bilder von Ihrem iPhone kopieren. Inspiriert vom eleganten Design der Paste App, bietet ShotCast eine moderne und intuitive Oberfläche für die Verwaltung Ihrer kopierten Bilder.
 
 ## ✨ Hauptfunktionen
 
 ### 🚀 Auto-Activation
-- **Automatische Fensteröffnung**: CopyPasta öffnet sich automatisch, wenn Sie ein Bild auf Ihrem iPhone kopieren
+- **Automatische Fensteröffnung**: ShotCast öffnet sich automatisch, wenn Sie ein Bild auf Ihrem iPhone kopieren
 - **Keine Tastenkombination erforderlich**: Das Fenster erscheint magisch von selbst
 - **Smart Detection**: Erkennt Universal Clipboard-Inhalte und unterscheidet zwischen lokalen und iPhone-Kopien
 
@@ -45,9 +45,9 @@ CopyPasta ist ein nativer macOS Universal Clipboard Manager, der automatisch akt
 
 ### Von Source:
 ```bash
-git clone https://github.com/tobsiberlin/CopyPasta.git
-cd CopyPasta
-xcodebuild -scheme copyPasta build
+git clone https://github.com/tobsiberlin/ShotCast.git
+cd ShotCast
+xcodebuild -scheme ShotCast build
 ```
 
 ### Direkt aus Xcode:
@@ -58,7 +58,7 @@ xcodebuild -scheme copyPasta build
 
 | Shortcut | Aktion |
 |----------|--------|
-| `Cmd+Ctrl+V` | CopyPasta öffnen/schließen |
+| `Cmd+Ctrl+V` | ShotCast öffnen/schließen |
 | `Cmd+Return` | Ausgewähltes Bild kopieren |
 | `Space` | Vollbild-Vorschau |
 | `Delete` | Bild löschen |
@@ -66,9 +66,9 @@ xcodebuild -scheme copyPasta build
 
 ## 🎯 Verwendung
 
-1. **Automatischer Start**: CopyPasta startet beim Mac-Login und läuft im Hintergrund
+1. **Automatischer Start**: ShotCast startet beim Mac-Login und läuft im Hintergrund
 2. **iPhone-Copy**: Kopieren Sie ein Bild auf Ihrem iPhone
-3. **Auto-Öffnung**: CopyPasta öffnet sich automatisch auf Ihrem Mac
+3. **Auto-Öffnung**: ShotCast öffnet sich automatisch auf Ihrem Mac
 4. **Verwaltung**: Durchsuchen, kopieren oder speichern Sie Ihre Bilder
 
 ## 🔒 Datenschutz
@@ -92,14 +92,14 @@ Copyright © 2025 Tobias Mattern. Alle Rechte vorbehalten.
 
 ---
 
-# CopyPasta - Automatic Universal Clipboard Manager
+# ShotCast - Automatic Universal Clipboard Manager
 
-CopyPasta is a native macOS Universal Clipboard manager that automatically activates when you copy images from your iPhone. Inspired by the elegant design of Paste app, CopyPasta offers a modern and intuitive interface for managing your copied images.
+ShotCast is a native macOS Universal Clipboard manager that automatically activates when you copy images from your iPhone. Inspired by the elegant design of Paste app, ShotCast offers a modern and intuitive interface for managing your copied images.
 
 ## ✨ Key Features
 
 ### 🚀 Auto-Activation
-- **Automatic Window Opening**: CopyPasta opens automatically when you copy an image on your iPhone
+- **Automatic Window Opening**: ShotCast opens automatically when you copy an image on your iPhone
 - **No Keyboard Shortcut Required**: The window appears magically by itself
 - **Smart Detection**: Recognizes Universal Clipboard content and distinguishes between local and iPhone copies
 
@@ -135,9 +135,9 @@ CopyPasta is a native macOS Universal Clipboard manager that automatically activ
 
 ### From Source:
 ```bash
-git clone https://github.com/tobsiberlin/CopyPasta.git
-cd CopyPasta
-xcodebuild -scheme copyPasta build
+git clone https://github.com/tobsiberlin/ShotCast.git
+cd ShotCast
+xcodebuild -scheme ShotCast build
 ```
 
 ### Directly from Xcode:
@@ -148,7 +148,7 @@ xcodebuild -scheme copyPasta build
 
 | Shortcut | Action |
 |----------|--------|
-| `Cmd+Ctrl+V` | Open/close CopyPasta |
+| `Cmd+Ctrl+V` | Open/close ShotCast |
 | `Cmd+Return` | Copy selected image |
 | `Space` | Full-screen preview |
 | `Delete` | Delete image |
@@ -156,9 +156,9 @@ xcodebuild -scheme copyPasta build
 
 ## 🎯 Usage
 
-1. **Automatic Start**: CopyPasta starts at Mac login and runs in background
+1. **Automatic Start**: ShotCast starts at Mac login and runs in background
 2. **iPhone Copy**: Copy an image on your iPhone
-3. **Auto-Opening**: CopyPasta opens automatically on your Mac
+3. **Auto-Opening**: ShotCast opens automatically on your Mac
 4. **Management**: Browse, copy, or save your images
 
 ## 🔒 Privacy
