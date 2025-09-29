@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5FCE17C42E8AE3B8003AD6E5 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17C32E8AE3B8003AD6E5 /* ToastView.swift */; };
+		5FCE17C62E8AE69F003AD6E5 /* ModernBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17C52E8AE69F003AD6E5 /* ModernBottomBarView.swift */; };
+		5FCE17C82E8AEA37003AD6E5 /* UltimateModernBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17C72E8AEA37003AD6E5 /* UltimateModernBarView.swift */; };
+		5FCE17CA2E8AECC1003AD6E5 /* PerfectBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17C92E8AECC1003AD6E5 /* PerfectBottomBarView.swift */; };
+		5FCE17CD2E8AF97E003AD6E5 /* IconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17CC2E8AF97E003AD6E5 /* IconGenerator.swift */; };
+		5FCE17CE2E8AF97E003AD6E5 /* AppIconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17CB2E8AF97E003AD6E5 /* AppIconCache.swift */; };
+		5FCE17D12E8AFA39003AD6E5 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17D02E8AFA39003AD6E5 /* OCRService.swift */; };
+		5FCE17D22E8AFA39003AD6E5 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCE17CF2E8AFA39003AD6E5 /* HotkeyManager.swift */; };
 		5FF1B4AD2E8A95BC00D84A65 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */; };
 		5FF1B4B12E8A971500D84A65 /* ModernSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */; };
 		5FF1B4BF2E8AA7EE00D84A65 /* ReliableDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF1B4BE2E8AA7EE00D84A65 /* ReliableDataManager.swift */; };
@@ -30,6 +38,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5FCE17C32E8AE3B8003AD6E5 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		5FCE17C52E8AE69F003AD6E5 /* ModernBottomBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernBottomBarView.swift; sourceTree = "<group>"; };
+		5FCE17C72E8AEA37003AD6E5 /* UltimateModernBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UltimateModernBarView.swift; sourceTree = "<group>"; };
+		5FCE17C92E8AECC1003AD6E5 /* PerfectBottomBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfectBottomBarView.swift; sourceTree = "<group>"; };
+		5FCE17CB2E8AF97E003AD6E5 /* AppIconCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconCache.swift; sourceTree = "<group>"; };
+		5FCE17CC2E8AF97E003AD6E5 /* IconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGenerator.swift; sourceTree = "<group>"; };
+		5FCE17CF2E8AFA39003AD6E5 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
+		5FCE17D02E8AFA39003AD6E5 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		5FF1B4AC2E8A95BC00D84A65 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
 		5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernSettingsView.swift; sourceTree = "<group>"; };
 		5FF1B4BE2E8AA7EE00D84A65 /* ReliableDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReliableDataManager.swift; sourceTree = "<group>"; };
@@ -65,6 +81,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5FCE17D32E8AFA7B003AD6E5 /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "New Group";
+			sourceTree = "<group>";
+		};
 		5FF1B4AB2E8A958700D84A65 /* Localization */ = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +108,9 @@
 		A1234567890ABCDEF023 /* ShotCast */ = {
 			isa = PBXGroup;
 			children = (
+				5FCE17D32E8AFA7B003AD6E5 /* New Group */,
+				5FCE17CF2E8AFA39003AD6E5 /* HotkeyManager.swift */,
+				5FCE17D02E8AFA39003AD6E5 /* OCRService.swift */,
 				A1234567890ABCDEF002 /* ShotCastApp.swift */,
 				A1234567890ABCDEF004 /* ContentView.swift */,
 				A1234567890ABCDEF025 /* Views */,
@@ -108,6 +134,10 @@
 		A1234567890ABCDEF025 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5FCE17C92E8AECC1003AD6E5 /* PerfectBottomBarView.swift */,
+				5FCE17C72E8AEA37003AD6E5 /* UltimateModernBarView.swift */,
+				5FCE17C52E8AE69F003AD6E5 /* ModernBottomBarView.swift */,
+				5FCE17C32E8AE3B8003AD6E5 /* ToastView.swift */,
 				5FF1B4B02E8A971500D84A65 /* ModernSettingsView.swift */,
 				A1234567890ABCDEF00E /* BottomBarView.swift */,
 				A1234567890ABCDEF010 /* ThumbnailCard.swift */,
@@ -131,6 +161,8 @@
 		A1234567890ABCDEF027 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				5FCE17CB2E8AF97E003AD6E5 /* AppIconCache.swift */,
+				5FCE17CC2E8AF97E003AD6E5 /* IconGenerator.swift */,
 				5FF1B4C02E8AAD2100D84A65 /* DragManager.swift */,
 				5FF1B4C12E8AAD2100D84A65 /* OCRManager.swift */,
 				5FF1B4C22E8AAD2100D84A65 /* SourceDetector.swift */,
@@ -227,10 +259,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5FCE17D12E8AFA39003AD6E5 /* OCRService.swift in Sources */,
+				5FCE17D22E8AFA39003AD6E5 /* HotkeyManager.swift in Sources */,
 				A1234567890ABCDEF003 /* ContentView.swift in Sources */,
 				A1234567890ABCDEF001 /* ShotCastApp.swift in Sources */,
+				5FCE17C82E8AEA37003AD6E5 /* UltimateModernBarView.swift in Sources */,
+				5FCE17C62E8AE69F003AD6E5 /* ModernBottomBarView.swift in Sources */,
 				A1234567890ABCDEF009 /* PasteboardWatcher.swift in Sources */,
 				A1234567890ABCDEF00B /* WindowManager.swift in Sources */,
+				5FCE17C42E8AE3B8003AD6E5 /* ToastView.swift in Sources */,
 				5FF1B4AD2E8A95BC00D84A65 /* LocalizationManager.swift in Sources */,
 				5FF1B4C42E8AAD2100D84A65 /* WindowSnappingManager.swift in Sources */,
 				5FF1B4C52E8AAD2100D84A65 /* DragManager.swift in Sources */,
@@ -238,11 +275,14 @@
 				5FF1B4C72E8AAD2100D84A65 /* SourceDetector.swift in Sources */,
 				A1234567890ABCDEF00D /* BottomBarView.swift in Sources */,
 				A1234567890ABCDEF00F /* ThumbnailCard.swift in Sources */,
+				5FCE17CD2E8AF97E003AD6E5 /* IconGenerator.swift in Sources */,
+				5FCE17CE2E8AF97E003AD6E5 /* AppIconCache.swift in Sources */,
 				A1234567890ABCDEF011 /* AppSettings.swift in Sources */,
 				A1234567890ABCDEF013 /* SettingsView.swift in Sources */,
 				5FF1B4B12E8A971500D84A65 /* ModernSettingsView.swift in Sources */,
 				A1234567890ABCDEF015 /* SettingsWindowManager.swift in Sources */,
 				5FF1B4BF2E8AA7EE00D84A65 /* ReliableDataManager.swift in Sources */,
+				5FCE17CA2E8AECC1003AD6E5 /* PerfectBottomBarView.swift in Sources */,
 				A1234567890ABCDEF017 /* ViewExtensions.swift in Sources */,
 				A1234567890ABCDEF019 /* ClipboardItem.swift in Sources */,
 			);

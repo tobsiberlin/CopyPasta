@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShotCast - Desktop-Optimized Swipe Stack</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            gap: 40px;
+        }
+
+        /* Card Stack Area */
+        .stack-area {
+            position: relative;
+            width: 450px;
+            height: 550px;
+            perspective: 1500px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 40px;
+            cursor: grab;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card.top {
+            z-index: 10;
+            transform: translateY(0) scale(1) rotateY(0deg);
+        }
+
+        .card.middle {
+            z-index: 9;
+            transform: translateY(10px) scale(0.95);
+            opacity: 0.8;
+        }
+
+        .card.bottom {
+            z-index: 8;
+            transform: translateY(20px) scale(0.9);
+            opacity: 0.5;
+        }
+
+        .card.swiping {
+            transition: none;
+        }
+
+        .card.swipe-left {
+            transform: translateX(-800px) rotate(-30deg) scale(0.8);
+            opacity: 0;
+        }
+
+        .card.swipe-right {
+            transform: translateX(800px) rotate(30deg) scale(0.8);
+            opacity: 0;
+        }
+
+        .card.swipe-up {
+            transform: translateY(-800px) rotate(10deg) scale(0.7);
+            opacity: 0;
+        }
+
+        .card.swipe-down {
+            transform: translateY(800px) rotate(-10deg) scale(0.7);
+            opacity: 0;
+        }
+
+        /* Card Header */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .source-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .source-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .source-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .source-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .source-time {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .device-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Card Content */
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .content-preview {
+            width: 100%;
+            max-height: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .preview-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+
+        .content-type-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        /* Card Footer with AI Insights */
+        .card-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-insight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .confidence-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        /* Swipe Action Indicators */
+        .swipe-indicator {
+            position: absolute;
+            font-size: 5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .swipe-indicator.left {
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .swipe-indicator.right {
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .swipe-indicator.up {
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .swipe-indicator.down {
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .swipe-indicator.active {
+            opacity: 1;
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Side Panel - Actions Guide */
+        .side-panel {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #667eea;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .action-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .action-details {
+            flex: 1;
+        }
+
+        .action-direction {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .action-description {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        /* Match Animation */
+        .match-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .match-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .match-content {
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .match-overlay.active .match-content {
+            transform: scale(1);
+        }
+
+        .match-title {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .match-subtitle {
+            font-size: 1.5rem;
+            color: #999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Undo Button */
+        .undo-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .undo-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .undo-button:hover {
+            background: rgba(102, 126, 234, 0.5);
+            transform: scale(1.05);
+        }
+
+        .undo-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Stack Counter */
+        .stack-counter {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ShotCast Swipe Stack</h1>
+        <p>Desktop-optimierte Tinder-inspirierte Clipboard-Verwaltung</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value" id="totalClips">12</div>
+            <div class="stat-label">Clips verbleibend</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="pinnedCount">0</div>
+            <div class="stat-label">Gepinnt</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="deletedCount">0</div>
+            <div class="stat-label">Gelöscht</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="stack-area" id="stackArea">
+            <div class="stack-counter">
+                <span id="currentIndex">1</span> / <span id="totalCards">12</span>
+            </div>
+
+            <!-- Swipe Indicators -->
+            <div class="swipe-indicator left" id="indicatorLeft">🗑️</div>
+            <div class="swipe-indicator right" id="indicatorRight">📌</div>
+            <div class="swipe-indicator up" id="indicatorUp">🔍</div>
+            <div class="swipe-indicator down" id="indicatorDown">📤</div>
+
+            <!-- Cards will be injected here -->
+        </div>
+
+        <div class="side-panel">
+            <div class="panel-title">⚡ Swipe-Aktionen</div>
+
+            <div class="action-item">
+                <div class="action-icon">←</div>
+                <div class="action-details">
+                    <div class="action-direction">Swipe Left</div>
+                    <div class="action-description">Löschen oder archivieren</div>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <div class="action-icon">→</div>
+                <div class="action-details">
+                    <div class="action-direction">Swipe Right</div>
+                    <div class="action-description">Pinnen oder kategorisieren</div>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <div class="action-icon">↑</div>
+                <div class="action-details">
+                    <div class="action-direction">Swipe Up</div>
+                    <div class="action-description">OCR aktivieren (für Bilder)</div>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <div class="action-icon">↓</div>
+                <div class="action-details">
+                    <div class="action-direction">Swipe Down</div>
+                    <div class="action-description">Teilen oder Drag & Drop</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                <div style="font-size: 0.9rem; color: #999; line-height: 1.6;">
+                    💡 <strong>Tipp:</strong> Nutze dein Trackpad für natürliche Zwei-Finger-Gesten oder ziehe die Karten mit der Maus!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="undo-container">
+        <button class="undo-button" id="undoButton" disabled>
+            ↶ Rückgängig
+        </button>
+    </div>
+
+    <!-- Match Overlay -->
+    <div class="match-overlay" id="matchOverlay">
+        <div class="match-content">
+            <div class="match-title">Perfect Match! 🎉</div>
+            <div class="match-subtitle">In "Bilder" kategorisiert</div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data
+        const clipboardData = [
+            {
+                icon: '📸',
+                source: 'Safari',
+                time: 'Gerade eben',
+                device: '💻 Mac',
+                type: 'Screenshot',
+                content: 'Apple.com Startseite mit neuem MacBook Pro M4 Design. Revolutionäre Features für kreative Profis.',
+                confidence: 95,
+                category: 'Bilder'
+            },
+            {
+                icon: '📝',
+                source: 'Notes',
+                time: 'Vor 2 Min',
+                device: '📱 iPhone',
+                type: 'Text',
+                content: 'Meeting Notes Q4 2025: Neue Features für ShotCast, Redesign der UI, Performance-Optimierung',
+                confidence: 88,
+                category: 'Text'
+            },
+            {
+                icon: '🎨',
+                source: 'Figma',
+                time: 'Vor 5 Min',
+                device: '💻 Mac',
+                type: 'Design',
+                content: 'UI Mockup – Swipe Stack Interface mit glassmorphism effects und smooth animations',
+                confidence: 92,
+                category: 'Bilder'
+            },
+            {
+                icon: '📊',
+                source: 'Excel',
+                time: 'Vor 8 Min',
+                device: '💻 Mac',
+                type: 'Tabelle',
+                content: 'Analytics Dashboard Export mit Q4 Metriken, User Growth +45%, Revenue +67%',
+                confidence: 78,
+                category: 'Daten'
+            },
+            {
+                icon: '🔗',
+                source: 'Chrome',
+                time: 'Vor 12 Min',
+                device: '💻 Mac',
+                type: 'URL',
+                content: 'https://github.com/anthropics/claude-code – Claude Code Repository',
+                confidence: 98,
+                category: 'Links'
+            },
+            {
+                icon: '💻',
+                source: 'VS Code',
+                time: 'Vor 15 Min',
+                device: '💻 Mac',
+                type: 'Code',
+                content: 'func swipeCard(direction: SwipeDirection) { ... } // SwiftUI implementation',
+                confidence: 85,
+                category: 'Code'
+            },
+            {
+                icon: '📧',
+                source: 'Mail',
+                time: 'Vor 20 Min',
+                device: '📱 iPhone',
+                type: 'Email',
+                content: 'team@company.com – Quarterly Review Meeting scheduled for next Tuesday',
+                confidence: 90,
+                category: 'Text'
+            },
+            {
+                icon: '🎬',
+                source: 'Premiere',
+                time: 'Vor 25 Min',
+                device: '💻 Mac',
+                type: 'Video',
+                content: 'Tutorial Recording – ShotCast Features Showcase 2025',
+                confidence: 82,
+                category: 'Medien'
+            },
+            {
+                icon: '📸',
+                source: 'Shottr',
+                time: 'Vor 30 Min',
+                device: '💻 Mac',
+                type: 'Screenshot',
+                content: 'Code snippet showing SwiftUI gesture handling with smooth animations',
+                confidence: 94,
+                category: 'Bilder'
+            },
+            {
+                icon: '📝',
+                source: 'TextEdit',
+                time: 'Vor 35 Min',
+                device: '💻 Mac',
+                type: 'Text',
+                content: 'Todo List: 1. Finish swipe stack prototype 2. Add confetti animation 3. Test on trackpad',
+                confidence: 86,
+                category: 'Text'
+            },
+            {
+                icon: '🎨',
+                source: 'Sketch',
+                time: 'Vor 40 Min',
+                device: '💻 Mac',
+                type: 'Design',
+                content: 'Icon set for ShotCast – 50 custom SF Symbols-style icons',
+                confidence: 91,
+                category: 'Bilder'
+            },
+            {
+                icon: '📊',
+                source: 'Numbers',
+                time: 'Vor 45 Min',
+                device: '📱 iPad',
+                type: 'Tabelle',
+                content: 'Budget Planning 2025 – Marketing: 120k, Development: 200k, Design: 80k',
+                confidence: 79,
+                category: 'Daten'
+            }
+        ];
+
+        // State
+        let currentCards = [...clipboardData];
+        let cardElements = [];
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let currentElement = null;
+        let lastAction = null;
+        let pinnedCount = 0;
+        let deletedCount = 0;
+
+        // Initialize
+        function init() {
+            createCards();
+            updateStats();
+            setupEventListeners();
+        }
+
+        function createCards() {
+            const stackArea = document.getElementById('stackArea');
+
+            // Clear existing cards
+            cardElements = [];
+            const existingCards = stackArea.querySelectorAll('.card');
+            existingCards.forEach(card => card.remove());
+
+            // Create up to 3 visible cards
+            for (let i = 0; i < Math.min(3, currentCards.length); i++) {
+                const card = createCardElement(currentCards[i], i);
+                stackArea.appendChild(card);
+                cardElements.push(card);
+            }
+        }
+
+        function createCardElement(data, index) {
+            const card = document.createElement('div');
+            card.className = `card ${index === 0 ? 'top' : index === 1 ? 'middle' : 'bottom'}`;
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="source-info">
+                        <div class="source-icon">${data.icon}</div>
+                        <div class="source-details">
+                            <div class="source-name">${data.source}</div>
+                            <div class="source-time">${data.time}</div>
+                        </div>
+                    </div>
+                    <div class="device-badge">${data.device}</div>
+                </div>
+
+                <div class="card-content">
+                    <div class="content-preview">
+                        <div class="preview-icon">${data.icon}</div>
+                        <div class="preview-text">${data.content}</div>
+                    </div>
+                    <div class="content-type-badge">${data.type}</div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="ai-insight">
+                        <span>🤖 KI-Kategorie: ${data.category}</span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${data.confidence}%"></div>
+                        </div>
+                        <span>${data.confidence}%</span>
+                    </div>
+                </div>
+            `;
+
+            if (index === 0) {
+                card.addEventListener('mousedown', startDrag);
+            }
+
+            return card;
+        }
+
+        function setupEventListeners() {
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.getElementById('undoButton').addEventListener('click', undo);
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            currentElement = e.currentTarget;
+            startX = e.clientX;
+            startY = e.clientY;
+            currentElement.classList.add('swiping');
+        }
+
+        function drag(e) {
+            if (!isDragging || !currentElement) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            const rotation = deltaX * 0.08;
+
+            currentElement.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+
+            // Update indicators
+            updateIndicators(deltaX, deltaY);
+        }
+
+        function endDrag(e) {
+            if (!isDragging || !currentElement) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+
+            // Determine swipe direction
+            if (Math.abs(deltaX) > 150 || Math.abs(deltaY) > 150) {
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Horizontal swipe
+                    if (deltaX > 0) {
+                        swipeCard('right');
+                    } else {
+                        swipeCard('left');
+                    }
+                } else {
+                    // Vertical swipe
+                    if (deltaY < 0) {
+                        swipeCard('up');
+                    } else {
+                        swipeCard('down');
+                    }
+                }
+            } else {
+                // Reset card position
+                currentElement.style.transform = '';
+            }
+
+            currentElement.classList.remove('swiping');
+            isDragging = false;
+            clearIndicators();
+        }
+
+        function swipeCard(direction) {
+            const card = currentElement;
+            const data = currentCards[0];
+
+            card.classList.add(`swipe-${direction}`);
+
+            // Store action for undo
+            lastAction = {
+                direction,
+                data,
+                card
+            };
+
+            // Update stats
+            if (direction === 'left') {
+                deletedCount++;
+            } else if (direction === 'right') {
+                pinnedCount++;
+
+                // Check for perfect match
+                if (data.confidence > 90) {
+                    showMatchAnimation(data.category);
+                }
+            }
+
+            // Remove card after animation
+            setTimeout(() => {
+                card.remove();
+                currentCards.shift();
+                cardElements.shift();
+
+                // Update remaining cards
+                updateCardPositions();
+
+                // Add new card if available
+                if (currentCards.length >= 3) {
+                    const newCard = createCardElement(currentCards[2], 2);
+                    document.getElementById('stackArea').appendChild(newCard);
+                    cardElements.push(newCard);
+                }
+
+                updateStats();
+                document.getElementById('undoButton').disabled = false;
+
+                // Reset if no cards left
+                if (currentCards.length === 0) {
+                    setTimeout(() => {
+                        alert('🎉 Alle Clips bearbeitet! Großartige Arbeit!');
+                        reset();
+                    }, 500);
+                }
+            }, 400);
+        }
+
+        function updateCardPositions() {
+            cardElements.forEach((card, index) => {
+                card.className = `card ${index === 0 ? 'top' : index === 1 ? 'middle' : 'bottom'}`;
+
+                // Only top card is draggable
+                if (index === 0) {
+                    card.addEventListener('mousedown', startDrag);
+                } else {
+                    card.removeEventListener('mousedown', startDrag);
+                }
+            });
+        }
+
+        function updateIndicators(deltaX, deltaY) {
+            const threshold = 50;
+
+            // Clear all
+            clearIndicators();
+
+            // Show appropriate indicator
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX < -threshold) {
+                    document.getElementById('indicatorLeft').classList.add('active');
+                } else if (deltaX > threshold) {
+                    document.getElementById('indicatorRight').classList.add('active');
+                }
+            } else {
+                if (deltaY < -threshold) {
+                    document.getElementById('indicatorUp').classList.add('active');
+                } else if (deltaY > threshold) {
+                    document.getElementById('indicatorDown').classList.add('active');
+                }
+            }
+        }
+
+        function clearIndicators() {
+            document.querySelectorAll('.swipe-indicator').forEach(ind => {
+                ind.classList.remove('active');
+            });
+        }
+
+        function showMatchAnimation(category) {
+            const overlay = document.getElementById('matchOverlay');
+            const subtitle = overlay.querySelector('.match-subtitle');
+            subtitle.textContent = `In "${category}" kategorisiert`;
+
+            overlay.classList.add('active');
+
+            // Create confetti
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createConfetti();
+                }, i * 30);
+            }
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 2000);
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.background = ['#667eea', '#764ba2', '#f093fb', '#4facfe'][Math.floor(Math.random() * 4)];
+            confetti.style.animationDelay = Math.random() * 0.5 + 's';
+            document.body.appendChild(confetti);
+
+            setTimeout(() => {
+                confetti.remove();
+            }, 3000);
+        }
+
+        function updateStats() {
+            document.getElementById('totalClips').textContent = currentCards.length;
+            document.getElementById('pinnedCount').textContent = pinnedCount;
+            document.getElementById('deletedCount').textContent = deletedCount;
+            document.getElementById('currentIndex').textContent = clipboardData.length - currentCards.length + 1;
+            document.getElementById('totalCards').textContent = clipboardData.length;
+        }
+
+        function undo() {
+            if (!lastAction) return;
+
+            // Restore card
+            currentCards.unshift(lastAction.data);
+
+            // Update stats
+            if (lastAction.direction === 'left') {
+                deletedCount--;
+            } else if (lastAction.direction === 'right') {
+                pinnedCount--;
+            }
+
+            // Recreate cards
+            createCards();
+            updateStats();
+
+            lastAction = null;
+            document.getElementById('undoButton').disabled = true;
+        }
+
+        function reset() {
+            currentCards = [...clipboardData];
+            pinnedCount = 0;
+            deletedCount = 0;
+            lastAction = null;
+            createCards();
+            updateStats();
+            document.getElementById('undoButton').disabled = true;
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

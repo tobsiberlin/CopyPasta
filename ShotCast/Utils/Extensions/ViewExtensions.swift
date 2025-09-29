@@ -10,7 +10,7 @@ extension View {
     }
     
     func smoothSpring() -> some View {
-        self.animation(.spring(response: 0.4, dampingFraction: 0.75, blendDuration: 0))
+        self.animation(.spring(response: 0.4, dampingFraction: 0.75, blendDuration: 0), value: UUID())
     }
     
     func hoverScale(_ scale: CGFloat = 1.05) -> some View {

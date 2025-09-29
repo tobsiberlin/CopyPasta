@@ -457,7 +457,7 @@ struct SliderSetting: View {
                         .fill(Color.secondary.opacity(0.2))
                         .frame(height: 6)
                 )
-                .onChange(of: value) { _ in
+                .onChange(of: value) { _, _ in
                     // Sofortige Live-Preview bei Änderungen
                     triggerLivePreview()
                 }
@@ -516,7 +516,7 @@ struct ToggleSetting: View {
                 .labelsHidden()
                 .toggleStyle(SwitchToggleStyle(tint: .accentColor))
                 .scaleEffect(0.9)
-                .onChange(of: isOn) { _ in
+                .onChange(of: isOn) { _, _ in
                     triggerLivePreview()
                 }
         }

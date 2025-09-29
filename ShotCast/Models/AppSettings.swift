@@ -58,26 +58,63 @@ class AppSettings: ObservableObject {
     @Published var themeMode: ThemeMode {
         didSet { UserDefaults.standard.set(themeMode.rawValue, forKey: "themeMode") }
     }
+
+    @Published var colorTheme: ColorTheme {
+        didSet { UserDefaults.standard.set(colorTheme.rawValue, forKey: "colorTheme") }
+    }
     
     enum ThemeMode: String, CaseIterable {
         case system = "system"
-        case light = "light" 
+        case light = "light"
         case dark = "dark"
-        
+
         var displayName: String {
-            let locManager = LocalizationManager.shared
             switch self {
-            case .system: return locManager.localizedString(.themeSystem)
-            case .light: return locManager.localizedString(.themeLight)
-            case .dark: return locManager.localizedString(.themeDark)
+            case .system: return "System"
+            case .light: return "Hell"
+            case .dark: return "Dunkel"
             }
         }
-        
+
         var icon: String {
             switch self {
             case .system: return "gear"
             case .light: return "sun.max"
             case .dark: return "moon"
+            }
+        }
+    }
+
+    enum ColorTheme: String, CaseIterable {
+        case blue = "blue"
+        case green = "green"
+        case red = "red"
+        case purple = "purple"
+
+        var displayName: String {
+            switch self {
+            case .blue: return "Blau"
+            case .green: return "Grün"
+            case .red: return "Rot"
+            case .purple: return "Lila"
+            }
+        }
+
+        var primaryColor: Color {
+            switch self {
+            case .blue: return .blue
+            case .green: return .green
+            case .red: return .red
+            case .purple: return .purple
+            }
+        }
+
+        var gradientColors: [Color] {
+            switch self {
+            case .blue: return [Color.blue, Color.cyan]
+            case .green: return [Color.green, Color.mint]
+            case .red: return [Color.red, Color.orange]
+            case .purple: return [Color.purple, Color.pink]
             }
         }
     }
@@ -123,6 +160,7 @@ class AppSettings: ObservableObject {
         self.autoHideEnabled = UserDefaults.standard.object(forKey: "autoHideEnabled") as? Bool ?? false
         self.keepOpenOnIOSCopy = UserDefaults.standard.object(forKey: "keepOpenOnIOSCopy") as? Bool ?? true
         self.themeMode = ThemeMode(rawValue: UserDefaults.standard.string(forKey: "themeMode") ?? "system") ?? .system
+        self.colorTheme = ColorTheme(rawValue: UserDefaults.standard.string(forKey: "colorTheme") ?? "blue") ?? .blue
     }
     
     func resetToDefaults() {
@@ -137,5 +175,6 @@ class AppSettings: ObservableObject {
         autoHideEnabled = false  // Standard: Leiste bleibt offen
         keepOpenOnIOSCopy = true
         themeMode = .system
+        colorTheme = .blue
     }
 }

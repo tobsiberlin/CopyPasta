@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShotCast Design Studies 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+        }
+
+        .design-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .design-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .design-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .design-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+
+        .design-description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .design-preview {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Design 1: Glassmorphism Neo */
+        .glass-neo {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-neo .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-item {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            margin: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .glass-item:hover::before {
+            left: 100%;
+        }
+
+        /* Design 2: Fluid Morphism */
+        .fluid-morph {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fluid-morph::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+            top: -50%;
+            left: -50%;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        .fluid-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            z-index: 2;
+        }
+
+        .fluid-item {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 50%;
+            margin: 0 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .fluid-item:hover {
+            transform: scale(1.15) translateY(-3px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .fluid-item::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fluid-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Design 3: Neural Network */
+        .neural-net {
+            background: #0a0a0a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neural-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+        }
+
+        .neural-bg::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, #00ff88, transparent);
+            left: 10%;
+            animation: pulse1 2s ease-in-out infinite alternate;
+        }
+
+        .neural-bg::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, #ff0080, transparent);
+            right: 15%;
+            animation: pulse2 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse1 {
+            0% { opacity: 0.3; transform: scaleY(0.5); }
+            100% { opacity: 1; transform: scaleY(1); }
+        }
+
+        @keyframes pulse2 {
+            0% { opacity: 1; transform: scaleY(1); }
+            100% { opacity: 0.3; transform: scaleY(0.7); }
+        }
+
+        .neural-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(255, 0, 128, 0.05) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .neural-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff88, #ff0080, transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .neural-item {
+            width: 48px;
+            height: 48px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 6px;
+            margin: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neural-item:hover {
+            border-color: #ff0080;
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .neural-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, #00ff88, transparent);
+            animation: rotate 2s linear infinite;
+            opacity: 0.7;
+        }
+
+        .neural-item:hover::before {
+            background: conic-gradient(from 0deg, transparent, #ff0080, transparent);
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .neural-item::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .neural-icon {
+            position: relative;
+            z-index: 2;
+            color: #00ff88;
+            transition: color 0.3s ease;
+        }
+
+        .neural-item:hover .neural-icon {
+            color: #ff0080;
+        }
+
+        /* Design 4: Organic Brutalism */
+        .organic-brutal {
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%);
+            position: relative;
+        }
+
+        .organic-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .organic-shapes::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 20%;
+            left: 80%;
+            animation: morph1 4s ease-in-out infinite;
+        }
+
+        .organic-shapes::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            bottom: 30%;
+            left: 10%;
+            animation: morph2 5s ease-in-out infinite reverse;
+        }
+
+        @keyframes morph1 {
+            0%, 100% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+                transform: rotate(0deg);
+            }
+            25% {
+                border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+                transform: rotate(90deg);
+            }
+            50% {
+                border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+                transform: rotate(180deg);
+            }
+            75% {
+                border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+                transform: rotate(270deg);
+            }
+        }
+
+        @keyframes morph2 {
+            0%, 100% {
+                border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+                transform: scale(1);
+            }
+            50% {
+                border-radius: 27% 73% 48% 52% / 42% 68% 32% 58%;
+                transform: scale(1.1);
+            }
+        }
+
+        .brutal-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0;
+            position: relative;
+            z-index: 2;
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+        }
+
+        .brutal-item {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+            margin: 0 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            clip-path: polygon(15% 0%, 85% 0%, 100% 35%, 100% 70%, 85% 100%, 15% 100%, 0% 70%, 0% 35%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .brutal-item:hover {
+            transform: scale(1.05) rotate(2deg);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            clip-path: polygon(10% 0%, 90% 0%, 100% 30%, 100% 75%, 90% 100%, 10% 100%, 0% 75%, 0% 30%);
+        }
+
+        .brutal-item::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+            clip-path: inherit;
+            z-index: -1;
+        }
+
+        /* Icons and Symbols */
+        .icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
+
+        .icon:hover {
+            opacity: 1;
+        }
+
+        /* Feature List */
+        .features {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .features h4 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .features ul {
+            list-style: none;
+            color: #666;
+        }
+
+        .features li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .features li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 2px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ShotCast Design Studies 2025</h1>
+
+        <div class="design-grid">
+            <!-- Design 1: Glassmorphism Neo -->
+            <div class="design-card">
+                <h2 class="design-title">🌟 Glassmorphism Neo</h2>
+                <p class="design-description">
+                    Eine moderne Interpretation von Glassmorphism mit subtilen Animationen und perfekter Transparenz.
+                    Inspiriert von iOS 15+ Design Language und macOS Big Sur Ästhetik.
+                </p>
+
+                <div class="design-preview glass-neo">
+                    <div class="bar">
+                        <div style="display: flex; align-items: center;">
+                            <div class="glass-item">📸</div>
+                            <div class="glass-item">📝</div>
+                            <div class="glass-item">🎨</div>
+                            <div class="glass-item">📊</div>
+                            <div class="glass-item">⭐</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="glass-item">⚙️</div>
+                            <div class="glass-item">✕</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h4>Design Features</h4>
+                    <ul>
+                        <li>Ultra-moderne Glaseffekte mit Backdrop-Blur</li>
+                        <li>Subtile Schimmer-Animationen bei Hover</li>
+                        <li>Perfekte Integration in macOS Design Language</li>
+                        <li>Adaptive Transparenz basierend auf Hintergrund</li>
+                        <li>Micro-Interactions mit sanften Übergängen</li>
+                    </ul>
+                    <div style="margin-top: 10px;">
+                        <span class="tech-badge">SwiftUI Blur</span>
+                        <span class="tech-badge">Visual Effect</span>
+                        <span class="tech-badge">Animation</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design 2: Fluid Morphism -->
+            <div class="design-card">
+                <h2 class="design-title">🌊 Fluid Morphism</h2>
+                <p class="design-description">
+                    Organische, fließende Formen mit dynamischen Farbverläufen. Inspiriert von Liquid Design
+                    und modernen App-Interfaces wie Spotify und Adobe Creative Cloud.
+                </p>
+
+                <div class="design-preview fluid-morph">
+                    <div class="fluid-bar">
+                        <div style="display: flex; align-items: center;">
+                            <div class="fluid-item">📸</div>
+                            <div class="fluid-item">📝</div>
+                            <div class="fluid-item">🎨</div>
+                            <div class="fluid-item">📊</div>
+                            <div class="fluid-item">⭐</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="fluid-item">⚙️</div>
+                            <div class="fluid-item">✕</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h4>Design Features</h4>
+                    <ul>
+                        <li>Organische, kreisrunde Button-Formen</li>
+                        <li>Floating Animation im Hintergrund</li>
+                        <li>Dynamische Scale-Transformationen</li>
+                        <li>Gradient-Overlays mit Radial-Effekten</li>
+                        <li>Elastic Cubic-Bezier Animationen</li>
+                    </ul>
+                    <div style="margin-top: 10px;">
+                        <span class="tech-badge">Core Animation</span>
+                        <span class="tech-badge">Gradient Mesh</span>
+                        <span class="tech-badge">Physics</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design 3: Neural Network -->
+            <div class="design-card">
+                <h2 class="design-title">⚡ Neural Network</h2>
+                <p class="design-description">
+                    Futuristisches Design mit Neon-Akzenten und animierten Datenströmen. Inspiriert von
+                    Cyberpunk-Ästhetik und modernen Developer Tools wie VS Code und Terminal Apps.
+                </p>
+
+                <div class="design-preview neural-net">
+                    <div class="neural-bg"></div>
+                    <div class="neural-bar">
+                        <div style="display: flex; align-items: center;">
+                            <div class="neural-item">
+                                <div class="neural-icon">📸</div>
+                            </div>
+                            <div class="neural-item">
+                                <div class="neural-icon">📝</div>
+                            </div>
+                            <div class="neural-item">
+                                <div class="neural-icon">🎨</div>
+                            </div>
+                            <div class="neural-item">
+                                <div class="neural-icon">📊</div>
+                            </div>
+                            <div class="neural-item">
+                                <div class="neural-icon">⭐</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="neural-item">
+                                <div class="neural-icon">⚙️</div>
+                            </div>
+                            <div class="neural-item">
+                                <div class="neural-icon">✕</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h4>Design Features</h4>
+                    <ul>
+                        <li>Animated Conic Gradients als Border</li>
+                        <li>Pulsating Data-Stream Visualisierung</li>
+                        <li>Neon Glow-Effekte mit Dynamic Colors</li>
+                        <li>Scanning Line Animation</li>
+                        <li>Dark Theme mit Cyberpunk-Akzenten</li>
+                    </ul>
+                    <div style="margin-top: 10px;">
+                        <span class="tech-badge">Metal Shaders</span>
+                        <span class="tech-badge">CAGradientLayer</span>
+                        <span class="tech-badge">Neon Effects</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design 4: Organic Brutalism -->
+            <div class="design-card">
+                <h2 class="design-title">🗿 Organic Brutalism</h2>
+                <p class="design-description">
+                    Rohe, geometrische Formen mit organischen Elementen. Inspiriert von Brutalist Architecture
+                    und modernen Design-Tools wie Figma, Linear und modernen Web-Interfaces.
+                </p>
+
+                <div class="design-preview organic-brutal">
+                    <div class="organic-shapes"></div>
+                    <div class="brutal-bar">
+                        <div style="display: flex; align-items: center;">
+                            <div class="brutal-item">📸</div>
+                            <div class="brutal-item">📝</div>
+                            <div class="brutal-item">🎨</div>
+                            <div class="brutal-item">📊</div>
+                            <div class="brutal-item">⭐</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="brutal-item">⚙️</div>
+                            <div class="brutal-item">✕</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h4>Design Features</h4>
+                    <ul>
+                        <li>Asymmetrische Polygon-Clip-Paths</li>
+                        <li>Morphing Organic Background Shapes</li>
+                        <li>Bold, kantige Interface-Elemente</li>
+                        <li>Kontrast zwischen Hart und Weich</li>
+                        <li>Unique Edge-Cutting Design</li>
+                    </ul>
+                    <div style="margin-top: 10px;">
+                        <span class="tech-badge">Clip Path</span>
+                        <span class="tech-badge">SVG Morph</span>
+                        <span class="tech-badge">Geometric</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.9); border-radius: 20px; padding: 40px; text-align: center;">
+            <h2 style="color: #333; margin-bottom: 20px;">Entscheidungshilfe</h2>
+            <p style="color: #666; font-size: 1.1rem; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+                Jeder Design-Ansatz bringt seine eigene Persönlichkeit mit und hebt ShotCast von der Konkurrenz ab.
+                <strong>Glassmorphism Neo</strong> für zeitlose Eleganz, <strong>Fluid Morphism</strong> für spielerische Modernität,
+                <strong>Neural Network</strong> für Tech-Enthusiasten, oder <strong>Organic Brutalism</strong> für absolute Einzigartigkeit.
+            </p>
+            <p style="color: #667eea; font-weight: 600; margin-top: 20px; font-size: 1.2rem;">
+                Welcher Stil spricht Sie am meisten an? 🎨
+            </p>
+        </div>
+    </div>
+</body>
+</html>

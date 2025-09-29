@@ -318,13 +318,29 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
             case .image: return "S" // Screenshot badge
             case .text: return "T" // Text badge
             case .document: return "D" // Document badge
-            case .pdf: return "P" // PDF badge  
+            case .pdf: return "P" // PDF badge
             case .video: return "V" // Video badge
             case .audio: return "A" // Audio badge
             case .archive: return "Z" // Zip badge
             case .url: return "L" // Link badge
             case .code: return "C" // Code badge
             case .other: return "F" // File badge
+            }
+        }
+
+        var badgeColor: Color {
+            // Badge-Farben für die Buchstaben-Fallbacks
+            switch self {
+            case .image: return .red // Wie im Screenshot - rotes "S"
+            case .text: return .green
+            case .document: return .blue
+            case .pdf: return .red
+            case .video: return .purple
+            case .audio: return .orange
+            case .archive: return .brown
+            case .url: return .teal
+            case .code: return .indigo
+            case .other: return .gray
             }
         }
         
@@ -344,21 +360,6 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
             }
         }
         
-        var badgeColor: Color {
-            // Badge-Hintergrundfarben
-            switch self {
-            case .image: return .red.opacity(0.9) // Rote "S"-Badge
-            case .text: return .blue.opacity(0.9)
-            case .document: return .green.opacity(0.9) 
-            case .pdf: return .red.opacity(0.9)
-            case .video: return .purple.opacity(0.9)
-            case .audio: return .orange.opacity(0.9)
-            case .archive: return .brown.opacity(0.9)
-            case .url: return .teal.opacity(0.9)
-            case .code: return .indigo.opacity(0.9)
-            case .other: return .gray.opacity(0.9)
-            }
-        }
         
         var color: Color {
             // Hauptfarben für die Icon-Darstellung

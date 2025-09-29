@@ -196,19 +196,19 @@ struct ModernSettingsView: View {
                 }
             }
             
-            // Theme Section
+            // Dark Mode Section - Vereinfacht
             ModernSettingsCard(
-                title: localizationManager.localizedString(.settingsTheme),
-                icon: "paintbrush"
+                title: "Dark Mode",
+                icon: "moon"
             ) {
                 VStack(spacing: 16) {
                     HStack {
-                        Text(localizationManager.localizedString(.settingsTheme))
+                        Text("Erscheinungsbild")
                             .font(.subheadline)
                             .foregroundColor(.primary)
-                        
+
                         Spacer()
-                        
+
                         Picker("", selection: $settings.themeMode) {
                             ForEach(AppSettings.ThemeMode.allCases, id: \.self) { mode in
                                 HStack {
@@ -218,8 +218,8 @@ struct ModernSettingsView: View {
                                 .tag(mode)
                             }
                         }
-                        .pickerStyle(.segmented)
-                        .frame(width: 200)
+                        .pickerStyle(.menu)
+                        .frame(width: 120)
                     }
                 }
             }
@@ -263,42 +263,104 @@ struct ModernSettingsView: View {
     
     private var appearanceTabContent: some View {
         VStack(spacing: 24) {
+            // Vorschaugröße
             ModernSettingsCard(
-                title: localizationManager.localizedString(.settingsAppearance),
+                title: "Vorschaugröße",
+                icon: "viewfinder"
+            ) {
+                VStack(spacing: 20) {
+                    ModernSliderSetting(
+                        title: "Bildgröße",
+                        value: $settings.screenshotSize,
+                        range: 80...300,
+                        unit: "px"
+                    )
+                    .onChange(of: settings.screenshotSize) {
+                        triggerLivePreview()
+                    }
+                }
+            }
+
+            // Farb-Theme
+            ModernSettingsCard(
+                title: "Farbthema",
+                icon: "paintpalette"
+            ) {
+                VStack(spacing: 16) {
+                    HStack {
+                        Text("Theme")
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Picker("", selection: $settings.colorTheme) {
+                            ForEach(AppSettings.ColorTheme.allCases, id: \.self) { theme in
+                                HStack {
+                                    Circle()
+                                        .fill(theme.primaryColor)
+                                        .frame(width: 12, height: 12)
+                                    Text(theme.displayName)
+                                }
+                                .tag(theme)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .frame(width: 120)
+                    }
+                    .onChange(of: settings.colorTheme) {
+                        triggerLivePreview()
+                    }
+                }
+            }
+
+            // Allgemeine Einstellungen
+            ModernSettingsCard(
+                title: "Allgemein",
                 icon: "slider.horizontal.3"
             ) {
                 VStack(spacing: 20) {
                     ModernSliderSetting(
-                        title: localizationManager.localizedString(.settingsBarHeight),
-                        value: $settings.barHeight,
-                        range: 60...200,
-                        unit: "px"
-                    )
-                    
-                    ModernSliderSetting(
-                        title: localizationManager.localizedString(.settingsBarOpacity),
+                        title: "Transparenz",
                         value: $settings.barOpacity,
                         range: 0.3...1.0,
                         unit: "%",
                         formatter: { String(format: "%.0f", $0 * 100) }
                     )
-                    
+                    .onChange(of: settings.barOpacity) {
+                        triggerLivePreview()
+                    }
+
                     ModernSliderSetting(
-                        title: localizationManager.localizedString(.settingsCornerRadius),
+                        title: "Eckenradius",
                         value: $settings.cornerRadius,
-                        range: 0...24,
+                        range: 8...24,
                         unit: "px"
                     )
-                    
+                    .onChange(of: settings.cornerRadius) {
+                        triggerLivePreview()
+                    }
+
                     ModernSliderSetting(
-                        title: localizationManager.localizedString(.settingsItemSpacing),
+                        title: "Abstand",
                         value: $settings.itemSpacing,
-                        range: 4...24,
+                        range: 8...32,
                         unit: "px"
                     )
+                    .onChange(of: settings.itemSpacing) {
+                        triggerLivePreview()
+                    }
                 }
             }
         }
+    }
+
+    private func triggerLivePreview() {
+        // Zeige die BottomBar für Live-Preview
+        NotificationCenter.default.post(name: Notification.Name("ShowBottomBarForPreview"), object: nil)
+
+        // Sende Live-Update-Notification
+        NotificationCenter.default.post(name: Notification.Name("SettingsLiveUpdate"), object: nil)
     }
     
     private var advancedTabContent: some View {

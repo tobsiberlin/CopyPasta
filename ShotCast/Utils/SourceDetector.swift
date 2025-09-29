@@ -42,7 +42,26 @@ class SourceDetector {
         let badge: String?
         let badgeColor: Color
         let displayName: String
-        
+
+        // Additional properties für die Errors
+        var appName: String {
+            return displayName
+        }
+
+        var bundleIdentifier: String? {
+            if case .app(let bundleId, _) = source {
+                return bundleId
+            }
+            return nil
+        }
+
+        var deviceName: String? {
+            if case .universalClipboard(let deviceType) = source {
+                return deviceType.displayName
+            }
+            return nil
+        }
+
         var iconImage: NSImage? {
             // Try to get actual app icon first
             if case .app(let bundleId, _) = source {

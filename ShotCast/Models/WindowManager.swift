@@ -78,7 +78,7 @@ class WindowManager: ObservableObject {
         
         let screenWidth = NSScreen.main?.visibleFrame.width ?? 1920
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: screenWidth - 40, height: AppSettings.shared.barHeight),
+            contentRect: NSRect(x: 0, y: 0, width: screenWidth, height: max(200, AppSettings.shared.barHeight)),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -99,11 +99,12 @@ class WindowManager: ObservableObject {
         // Immer den Hauptbildschirm verwenden (nicht screen where mouse is)
         let screen = NSScreen.main ?? NSScreen.screens.first!
         let screenFrame = screen.visibleFrame
-        let windowWidth: CGFloat = screenFrame.width - 40  // Fast die ganze Bildschirmbreite
-        let windowHeight = AppSettings.shared.barHeight
-        
-        let x = screenFrame.midX - windowWidth / 2
-        let y = screenFrame.minY + 20
+        // VOLLBREITE ohne Abstand - direkt bis ganz unten!
+        let windowWidth: CGFloat = screenFrame.width  // GANZE Bildschirmbreite
+        let windowHeight = max(200, AppSettings.shared.barHeight) // Mindesthöhe
+
+        let x = screenFrame.minX  // Ganz links
+        let y = screenFrame.minY  // Ganz unten
         
         window.setFrame(NSRect(x: x, y: y, width: windowWidth, height: windowHeight), display: true)
         
@@ -224,7 +225,7 @@ class WindowManager: ObservableObject {
         isDragging = false
         
         // Optional: Snapping to edges
-        guard let window = window else { return }
+        guard window != nil else { return }
         // TODO: Implement edge snapping if needed
         // snappingManager.snapToNearestEdge(window: window)
     }
@@ -320,8 +321,9 @@ class WindowManager: ObservableObject {
     }
     
     func updateDragPosition(delta: NSPoint) {
-        guard isDragging, let window = window else { return }
-        
+        guard let window = window else { return }
+
+        // Direkte Position-Updates ohne isDragging Flag
         let currentFrame = window.frame
         let newFrame = NSRect(
             x: currentFrame.origin.x + delta.x,
@@ -329,17 +331,23 @@ class WindowManager: ObservableObject {
             width: currentFrame.width,
             height: currentFrame.height
         )
-        
-        window.setFrame(newFrame, display: true, animate: false)
-        
-        // Show snap preview during dragging
-        let mouseLocation = NSEvent.mouseLocation
-        if let snapZone = snappingManager.detectSnapZone(for: window, mouseLocation: mouseLocation) {
-            if let screen = window.screen {
-                snappingManager.showSnapPreview(for: snapZone, on: screen)
-            }
+
+        // Bildschirmgrenzen respektieren
+        if let screen = window.screen {
+            let screenFrame = screen.visibleFrame
+            let constrainedX = max(screenFrame.minX, min(screenFrame.maxX - newFrame.width, newFrame.origin.x))
+            let constrainedY = max(screenFrame.minY, min(screenFrame.maxY - newFrame.height, newFrame.origin.y))
+
+            let constrainedFrame = NSRect(
+                x: constrainedX,
+                y: constrainedY,
+                width: newFrame.width,
+                height: newFrame.height
+            )
+
+            window.setFrame(constrainedFrame, display: true, animate: false)
         } else {
-            snappingManager.hideSnapPreview()
+            window.setFrame(newFrame, display: true, animate: false)
         }
     }
     
@@ -469,5 +477,26 @@ class WindowManager: ObservableObject {
         }
         
         currentEdge = edge
+    }
+
+    // MARK: - Full Width Support
+    func updateWindowForFullWidth() {
+        guard let window = window, let screen = NSScreen.main else { return }
+
+        let screenFrame = screen.visibleFrame
+
+        // Volle Bildschirmbreite, bis ganz unten
+        let newFrame = NSRect(
+            x: screenFrame.minX,
+            y: screenFrame.minY,
+            width: screenFrame.width,
+            height: max(200, AppSettings.shared.barHeight) // Mindesthöhe für Controls
+        )
+
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.4
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            window.animator().setFrame(newFrame, display: true)
+        }
     }
 }

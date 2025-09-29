@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShotCast Design Concepts V2 - Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 3rem;
+            font-weight: 300;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 50px;
+            font-size: 1.2rem;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .concept-card {
+            background: #242424;
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid #333;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .concept-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .concept-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .concept-title {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .concept-inspiration {
+            font-size: 0.9rem;
+            color: #999;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
+        .concept-description {
+            color: #aaa;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .interactive-demo {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        /* Concept 1: Card Stack */
+        .card-stack-container {
+            perspective: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .stack-card {
+            position: absolute;
+            width: 320px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: grab;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .stack-card:active {
+            cursor: grabbing;
+        }
+
+        .stack-card:nth-child(1) {
+            z-index: 3;
+            transform: translateY(0) scale(1);
+        }
+
+        .stack-card:nth-child(2) {
+            z-index: 2;
+            transform: translateY(10px) scale(0.95);
+            opacity: 0.8;
+        }
+
+        .stack-card:nth-child(3) {
+            z-index: 1;
+            transform: translateY(20px) scale(0.9);
+            opacity: 0.6;
+        }
+
+        .stack-card.swiping-right {
+            transform: translateX(400px) rotate(20deg);
+            opacity: 0;
+        }
+
+        .stack-card.swiping-left {
+            transform: translateX(-400px) rotate(-20deg);
+            opacity: 0;
+        }
+
+        .stack-card.swiping-up {
+            transform: translateY(-400px) scale(0.8);
+            opacity: 0;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+
+        .swipe-hints {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .swipe-hint {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Concept 2: Infinite Canvas */
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .masonry-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .masonry-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .masonry-grid::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .masonry-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .masonry-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .masonry-item.large {
+            grid-row: span 2;
+        }
+
+        .masonry-item.medium {
+            grid-row: span 1;
+        }
+
+        .masonry-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .masonry-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .masonry-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .masonry-item:hover .masonry-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Concept 3: Command Center */
+        .command-center {
+            display: flex;
+            height: 100%;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .sidebar-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .preview-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .preview-meta {
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .preview-content {
+            max-width: 400px;
+            line-height: 1.6;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .quick-actions {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-action {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action:hover {
+            background: rgba(102, 126, 234, 0.5);
+            transform: scale(1.15);
+        }
+
+        /* Concept 4: Timeline Flow */
+        .timeline-container {
+            height: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 20px 0;
+        }
+
+        .timeline-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .timeline-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .timeline-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .timeline-flow {
+            display: flex;
+            gap: 30px;
+            min-width: max-content;
+            padding: 0 20px;
+        }
+
+        .timeline-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .timeline-marker {
+            font-size: 0.85rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .timeline-items {
+            display: flex;
+            gap: 15px;
+        }
+
+        .timeline-card {
+            width: 180px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-card:hover {
+            transform: scale(1.08) translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+            border-color: #667eea;
+            z-index: 10;
+        }
+
+        .timeline-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .timeline-card:hover::before {
+            left: 100%;
+        }
+
+        .timeline-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .timeline-card-text {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+        }
+
+        .timeline-card-time {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Feature List */
+        .features-list {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .features-list h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .features-list ul {
+            list-style: none;
+            color: #aaa;
+        }
+
+        .features-list li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tech-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .instruction {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            color: #667eea;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ShotCast Design Concepts V2</h1>
+        <p class="subtitle">Interaktive Design-Prototypen – Voll funktionsfähige Demos zum Ausprobieren</p>
+
+        <div class="concept-grid">
+            <!-- Concept 1: Card Stack -->
+            <div class="concept-card">
+                <div class="concept-header">
+                    <h2 class="concept-title">🎯 Card Stack</h2>
+                    <span class="concept-inspiration">Tinder-Style</span>
+                </div>
+                <p class="concept-description">
+                    Swipe-basierte Navigation mit 3D-Kartenstapel. Extrem schnelle One-Hand-Bedienung
+                    durch intuitive Gesten.
+                </p>
+
+                <div class="interactive-demo">
+                    <div class="card-stack-container" id="cardStack">
+                        <div class="stack-card">
+                            <div class="card-content">
+                                <div>
+                                    <div class="card-icon">📸</div>
+                                    <div class="card-text">Screenshot von Safari – Apple.com Startseite mit neuem Design</div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Safari</span>
+                                    <span>Gerade eben</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stack-card">
+                            <div class="card-content">
+                                <div>
+                                    <div class="card-icon">📝</div>
+                                    <div class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Notes</span>
+                                    <span>Vor 5 Min</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stack-card">
+                            <div class="card-content">
+                                <div>
+                                    <div class="card-icon">🎨</div>
+                                    <div class="card-text">Design mockup from Figma</div>
+                                </div>
+                                <div class="card-footer">
+                                    <span>Figma</span>
+                                    <span>Vor 12 Min</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swipe-hints">
+                        <div class="swipe-hint">← Löschen</div>
+                        <div class="swipe-hint">↑ Kopieren</div>
+                        <div class="swipe-hint">→ Speichern</div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    💡 Ziehe die oberste Karte in eine Richtung oder klicke sie an
+                </div>
+
+                <div class="features-list">
+                    <h4>Features & Vorteile</h4>
+                    <ul>
+                        <li>Intuitive Swipe-Gesten (Links/Rechts/Oben)</li>
+                        <li>3D-Stapel-Effekt mit Glassmorphismus</li>
+                        <li>Perfekt für schnelle Triage von Clipboard-Items</li>
+                        <li>Touch-optimiert für Trackpad-Gesten</li>
+                        <li>Minimale UI – Fokus auf Inhalt</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-badge">SwiftUI Gestures</span>
+                        <span class="tech-badge">3D Transform</span>
+                        <span class="tech-badge">Drag & Drop</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concept 2: Infinite Canvas -->
+            <div class="concept-card">
+                <div class="concept-header">
+                    <h2 class="concept-title">🌊 Infinite Canvas</h2>
+                    <span class="concept-inspiration">Pinterest-Style</span>
+                </div>
+                <p class="concept-description">
+                    Masonry-Grid mit adaptiven Kachelgrößen. Perfekte Übersicht für visuelle Inhalte
+                    mit Smart Grouping.
+                </p>
+
+                <div class="interactive-demo">
+                    <div class="masonry-grid">
+                        <div class="masonry-item large">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">📸</div>
+                            <div class="masonry-text">Screenshot – Apple Design Guidelines 2025</div>
+                        </div>
+                        <div class="masonry-item medium">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">📝</div>
+                            <div class="masonry-text">Meeting Notes</div>
+                        </div>
+                        <div class="masonry-item medium">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">🎨</div>
+                            <div class="masonry-text">Color Palette</div>
+                        </div>
+                        <div class="masonry-item large">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">📊</div>
+                            <div class="masonry-text">Analytics Dashboard Export from Figma with detailed charts</div>
+                        </div>
+                        <div class="masonry-item medium">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">🔗</div>
+                            <div class="masonry-text">https://apple.com</div>
+                        </div>
+                        <div class="masonry-item medium">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">💻</div>
+                            <div class="masonry-text">Code Snippet</div>
+                        </div>
+                        <div class="masonry-item large">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">🎬</div>
+                            <div class="masonry-text">Video Thumbnail – Tutorial Recording</div>
+                        </div>
+                        <div class="masonry-item medium">
+                            <div class="masonry-actions">
+                                <div class="action-btn">⭐</div>
+                                <div class="action-btn">📋</div>
+                                <div class="action-btn">🗑️</div>
+                            </div>
+                            <div class="masonry-icon">📧</div>
+                            <div class="masonry-text">Email Address</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    💡 Hover über Kacheln für Quick Actions – Scroll für mehr
+                </div>
+
+                <div class="features-list">
+                    <h4>Features & Vorteile</h4>
+                    <ul>
+                        <li>Adaptive Kachelgrößen je nach Inhaltstyp</li>
+                        <li>Hover-Actions für Schnellzugriff</li>
+                        <li>Optimale Raumnutzung wie Pinterest</li>
+                        <li>Smooth Parallax-Scrolling</li>
+                        <li>Visuell ansprechend für Bilder & Screenshots</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-badge">LazyVGrid</span>
+                        <span class="tech-badge">Masonry Layout</span>
+                        <span class="tech-badge">Hover Effects</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concept 3: Command Center -->
+            <div class="concept-card">
+                <div class="concept-header">
+                    <h2 class="concept-title">🎭 Command Center</h2>
+                    <span class="concept-inspiration">Arc Browser-Style</span>
+                </div>
+                <p class="concept-description">
+                    Split-View mit Sidebar und großer Vorschau. Professionelles Design mit
+                    Spaces für verschiedene Workspaces.
+                </p>
+
+                <div class="interactive-demo">
+                    <div class="command-center">
+                        <div class="sidebar" id="sidebar">
+                            <div class="sidebar-item active">
+                                <span>📸</span> Screenshot 1
+                            </div>
+                            <div class="sidebar-item">
+                                <span>📝</span> Text Note
+                            </div>
+                            <div class="sidebar-item">
+                                <span>🎨</span> Design File
+                            </div>
+                            <div class="sidebar-item">
+                                <span>📊</span> Chart Data
+                            </div>
+                            <div class="sidebar-item">
+                                <span>🔗</span> URL Link
+                            </div>
+                            <div class="sidebar-item">
+                                <span>💻</span> Code Snippet
+                            </div>
+                        </div>
+                        <div class="preview-panel">
+                            <div class="preview-icon">📸</div>
+                            <div class="preview-title">Screenshot von Safari</div>
+                            <div class="preview-meta">Heute, 14:32 · Safari</div>
+                            <div class="preview-content">
+                                Apple.com Startseite mit neuem Design. Zeigt das aktuelle MacBook Pro
+                                mit M4 Chip und revolutionären Features für kreative Profis.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quick-actions">
+                        <div class="quick-action">📋</div>
+                        <div class="quick-action">⭐</div>
+                        <div class="quick-action">📤</div>
+                        <div class="quick-action">🗑️</div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    💡 Klicke auf Sidebar-Items für Vorschau – Quick Actions am unteren Rand
+                </div>
+
+                <div class="features-list">
+                    <h4>Features & Vorteile</h4>
+                    <ul>
+                        <li>Split-View: Kompakte Liste + große Vorschau</li>
+                        <li>Spaces für verschiedene Projekte/Workspaces</li>
+                        <li>Spotlight-ähnliche Suche mit Blur</li>
+                        <li>Quick Actions Bar für häufige Aktionen</li>
+                        <li>Professionell und produktivitätsorientiert</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-badge">NavigationSplitView</span>
+                        <span class="tech-badge">Detail View</span>
+                        <span class="tech-badge">Action Bar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concept 4: Timeline Flow -->
+            <div class="concept-card">
+                <div class="concept-header">
+                    <h2 class="concept-title">🔮 Timeline Flow</h2>
+                    <span class="concept-inspiration">Apple Music-Style</span>
+                </div>
+                <p class="concept-description">
+                    Chronologische Visualisierung mit horizontalem Scroll. Cover-Flow-Effekt
+                    für intuitive zeitliche Navigation.
+                </p>
+
+                <div class="interactive-demo">
+                    <div class="timeline-container">
+                        <div class="timeline-flow">
+                            <div class="timeline-section">
+                                <div class="timeline-marker">🌅 Heute</div>
+                                <div class="timeline-items">
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">📸</div>
+                                        <div class="timeline-card-text">Screenshot – Safari Startseite</div>
+                                        <div class="timeline-card-time">14:32</div>
+                                    </div>
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">📝</div>
+                                        <div class="timeline-card-text">Meeting Notes Q4 Planning</div>
+                                        <div class="timeline-card-time">13:15</div>
+                                    </div>
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">🎨</div>
+                                        <div class="timeline-card-text">Figma Design Export</div>
+                                        <div class="timeline-card-time">11:48</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-section">
+                                <div class="timeline-marker">📅 Gestern</div>
+                                <div class="timeline-items">
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">📊</div>
+                                        <div class="timeline-card-text">Analytics Dashboard</div>
+                                        <div class="timeline-card-time">18:22</div>
+                                    </div>
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">🔗</div>
+                                        <div class="timeline-card-text">https://apple.com/macbook</div>
+                                        <div class="timeline-card-time">16:45</div>
+                                    </div>
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">💻</div>
+                                        <div class="timeline-card-text">SwiftUI Code Snippet</div>
+                                        <div class="timeline-card-time">14:12</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-section">
+                                <div class="timeline-marker">🗓️ Diese Woche</div>
+                                <div class="timeline-items">
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">🎬</div>
+                                        <div class="timeline-card-text">Video Tutorial Recording</div>
+                                        <div class="timeline-card-time">Mo 10:30</div>
+                                    </div>
+                                    <div class="timeline-card">
+                                        <div class="timeline-card-icon">📧</div>
+                                        <div class="timeline-card-text">Email: team@company.com</div>
+                                        <div class="timeline-card-time">Mo 09:15</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    💡 Scroll horizontal durch die Zeit – Hover für Cover-Flow-Effekt
+                </div>
+
+                <div class="features-list">
+                    <h4>Features & Vorteile</h4>
+                    <ul>
+                        <li>Chronologische Visualisierung mit Zeit-Markern</li>
+                        <li>Horizontaler Scroll durch Zeitabschnitte</li>
+                        <li>Cover-Flow-Effekt bei Hover wie Apple Music</li>
+                        <li>Blur-Transitions zwischen Sektionen</li>
+                        <li>Intuitive zeitliche Navigation</li>
+                    </ul>
+                    <div class="tech-stack">
+                        <span class="tech-badge">ScrollView</span>
+                        <span class="tech-badge">Horizontal Layout</span>
+                        <span class="tech-badge">Cover Flow</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Card Stack Interaction
+        const cardStack = document.getElementById('cardStack');
+        let cards = Array.from(cardStack.querySelectorAll('.stack-card'));
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let currentCard = null;
+
+        function initCardStack() {
+            cards.forEach((card, index) => {
+                if (index === 0) {
+                    card.addEventListener('mousedown', startDrag);
+                    card.addEventListener('click', (e) => {
+                        if (!isDragging) {
+                            removeTopCard('swiping-up');
+                        }
+                    });
+                }
+            });
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            currentCard = e.currentTarget;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging || !currentCard) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            const rotation = deltaX * 0.1;
+
+            currentCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+        }
+
+        function endDrag(e) {
+            if (!isDragging || !currentCard) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+
+            if (Math.abs(deltaX) > 100) {
+                removeTopCard(deltaX > 0 ? 'swiping-right' : 'swiping-left');
+            } else if (deltaY < -100) {
+                removeTopCard('swiping-up');
+            } else {
+                currentCard.style.transform = '';
+            }
+
+            isDragging = false;
+            currentCard = null;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', endDrag);
+        }
+
+        function removeTopCard(direction) {
+            const topCard = cards[0];
+            topCard.classList.add(direction);
+
+            setTimeout(() => {
+                topCard.remove();
+                cards.shift();
+
+                // Add new card at the bottom
+                const newCard = createNewCard();
+                cardStack.appendChild(newCard);
+                cards.push(newCard);
+
+                // Re-init
+                initCardStack();
+            }, 500);
+        }
+
+        function createNewCard() {
+            const icons = ['📸', '📝', '🎨', '📊', '🔗', '💻', '🎬'];
+            const apps = ['Safari', 'Notes', 'Figma', 'Excel', 'Chrome', 'VS Code', 'Premiere'];
+            const card = document.createElement('div');
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            const randomApp = apps[Math.floor(Math.random() * apps.length)];
+
+            card.className = 'stack-card';
+            card.innerHTML = `
+                <div class="card-content">
+                    <div>
+                        <div class="card-icon">${randomIcon}</div>
+                        <div class="card-text">Neuer Clipboard-Inhalt von ${randomApp}</div>
+                    </div>
+                    <div class="card-footer">
+                        <span>${randomApp}</span>
+                        <span>Gerade eben</span>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        initCardStack();
+
+        // Command Center Sidebar Interaction
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', () => {
+                sidebarItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
