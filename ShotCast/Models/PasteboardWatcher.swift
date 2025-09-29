@@ -83,8 +83,22 @@ class PasteboardWatcher: ObservableObject {
         for item in pasteboardItems {
             var newItem: ClipboardItem? = nil
             
-            // 1. Prüfe auf Bilder mit Datenvalidierung
-            if let imageData = extractImageDataReliably(from: item) {
+            // 1. Prüfe ZUERST auf file-URLs von iOS die Bilder sein könnten
+            if let fileURLString = item.string(forType: NSPasteboard.PasteboardType("public.file-url")),
+               let fileURL = URL(string: fileURLString),
+               fileURL.pathExtension.lowercased() == "png" || fileURL.pathExtension.lowercased() == "jpg" || fileURL.pathExtension.lowercased() == "jpeg" {
+                // Versuche die Datei als Bild zu laden
+                if let imageData = try? Data(contentsOf: fileURL), 
+                   imageData.count > 0,
+                   NSImage(data: imageData) != nil {
+                    let contentType: UTType = fileURL.pathExtension.lowercased() == "png" ? .png : .jpeg
+                    newItem = ClipboardItem(imageData: imageData, contentType: contentType)
+                    print("✅ iOS Bild erfolgreich geladen: \(fileURL.lastPathComponent)")
+                }
+            }
+            
+            // 2. Prüfe auf normale Bilder mit Datenvalidierung
+            else if let imageData = extractImageDataReliably(from: item) {
                 
                 let contentType: UTType
                 if item.data(forType: .png) != nil {
@@ -102,9 +116,8 @@ class PasteboardWatcher: ObservableObject {
                 newItem = ClipboardItem(imageData: imageData, contentType: contentType)
             }
             
-            // 2. Prüfe auf URLs
-            else if let urlString = item.string(forType: NSPasteboard.PasteboardType("public.url")) ?? 
-                                   item.string(forType: NSPasteboard.PasteboardType("public.file-url")) {
+            // 3. Prüfe auf andere URLs (nicht file-urls)
+            else if let urlString = item.string(forType: NSPasteboard.PasteboardType("public.url")) {
                 newItem = ClipboardItem(url: urlString)
             }
             
