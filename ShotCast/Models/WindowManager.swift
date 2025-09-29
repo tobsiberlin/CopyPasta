@@ -132,51 +132,58 @@ class WindowManager: ObservableObject {
     // MARK: - Resize Funktionalität mit automatischer Symbol-Anpassung
     func resizeWindow(deltaWidth: CGFloat, fromLeft: Bool = false) {
         guard let window = window else { return }
-        
+
         let currentFrame = window.frame
         var newFrame = currentFrame
-        
+
+        // MINIMALE GRÖSSEN definieren
+        let minWidth: CGFloat = 500  // Mindestbreite erhöht, damit UI immer sichtbar
+        let minHeight: CGFloat = 250  // Mindesthöhe für Controls + mindestens ein Element
+
         if fromLeft {
             // Resize von links: Position und Breite ändern
             newFrame.origin.x = max(0, currentFrame.origin.x - deltaWidth)
-            newFrame.size.width = max(300, currentFrame.width + deltaWidth)
+            newFrame.size.width = max(minWidth, currentFrame.width + deltaWidth)
         } else {
             // Resize von rechts: Nur Breite ändern
-            newFrame.size.width = max(300, currentFrame.width + deltaWidth)
+            newFrame.size.width = max(minWidth, currentFrame.width + deltaWidth)
         }
-        
+
+        // Höhe respektieren (nie kleiner als Minimum)
+        newFrame.size.height = max(minHeight, newFrame.size.height)
+
         // Bildschirmgrenzen respektieren
         if let screen = window.screen {
             let screenFrame = screen.visibleFrame
             let maxX = screenFrame.maxX
             let maxWidth = maxX - newFrame.origin.x
-            
+
             newFrame.size.width = min(newFrame.size.width, maxWidth)
             newFrame.origin.x = max(screenFrame.minX, newFrame.origin.x)
         }
-        
+
         // Intelligente Symbol-Größen-Anpassung basierend auf Fenstergröße
         let baseWidth: CGFloat = 800 // Referenzbreite für Standard-Screenshot-Größe
         let baseScreenshotSize: CGFloat = 176 // Basis-Screenshot-Größe
         let minScreenshotSize: CGFloat = 88
         let maxScreenshotSize: CGFloat = 320
-        
+
         let ratio = newFrame.size.width / baseWidth
         let newScreenshotSize = max(minScreenshotSize, min(maxScreenshotSize, baseScreenshotSize * ratio))
-        
+
         // Update AppSettings Screenshot-Größe
         DispatchQueue.main.async {
             AppSettings.shared.screenshotSize = newScreenshotSize
-            AppSettings.shared.barHeight = newScreenshotSize + 100 // Auto-adjust bar height
+            AppSettings.shared.barHeight = max(minHeight, newScreenshotSize + 100) // Auto-adjust bar height, mindestens minHeight
         }
-        
+
         // Smooth Animation
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.1
             context.allowsImplicitAnimation = true
             window.setFrame(newFrame, display: true, animate: true)
         }
-        
+
         // Trigger Live-Update für sofortiges UI-Feedback
         NotificationCenter.default.post(
             name: Notification.Name("SettingsLiveUpdate"),

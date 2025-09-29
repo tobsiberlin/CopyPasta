@@ -181,8 +181,9 @@ class HotkeyManager: ObservableObject {
         }
         
         updateHotkeyString()
-        
-        let hotKeyID = EventHotKeyID(signature: OSType(fourCharCode: "SHOT"), id: 1)
+
+        let signature: OSType = 0x53484F54  // 'SHOT' in hex
+        let hotKeyID = EventHotKeyID(signature: signature, id: 1)
         
         let status = RegisterEventHotKey(
             keyCode,
@@ -233,7 +234,7 @@ class HotkeyManager: ObservableObject {
         DispatchQueue.main.async {
             // Toggle ShotCast Window
             let windowManager = WindowManager.shared
-            if windowManager.isWindowVisible {
+            if windowManager.isVisible {
                 windowManager.hideWindow()
             } else {
                 windowManager.showWindow()

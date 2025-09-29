@@ -17,6 +17,8 @@ struct BottomBarView: View {
     @State private var isDraggingWindow = false
     @State private var isResizing = false
     @State private var dragStartPoint: CGPoint = .zero
+    @State private var showOCRAlert = false
+    @State private var ocrResultText = ""
 
     // Gefilterte Items
     var favoriteItems: [ClipboardItem] {
@@ -87,6 +89,11 @@ struct BottomBarView: View {
         .preferredColorScheme(preferredColorScheme)
         .onAppear {
             setupListeners()
+        }
+        .onChange(of: showOCRAlert) { oldValue, newValue in
+            if newValue {
+                showCenteredOCRAlert()
+            }
         }
     }
 
@@ -637,31 +644,90 @@ struct BottomBarView: View {
 
     // MARK: - OCR
     private func performOCR(on item: ClipboardItem) {
-        guard let imageData = item.imageData,
-              let nsImage = NSImage(data: imageData),
-              let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+        print("🔍 OCR gestartet für Element: \(item.id)")
+        print("📸 Element ist Bild: \(item.isImage)")
+
+        if let fileName = item.fileName {
+            print("📄 Dateiname: \(fileName)")
+        }
+        if let sourceInfo = item.sourceInfo {
+            print("📱 Quelle: \(sourceInfo.displayName)")
+        }
+        print("📦 ImageData verfügbar: \(item.imageData != nil)")
+
+        guard item.isImage, let imageData = item.imageData else {
+            print("❌ Kein imageData verfügbar für Element \(item.id)")
+            showOCRError(message: "Kein Bild verfügbar")
             return
         }
 
-        let request = VNRecognizeTextRequest { request, error in
-            guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
+        print("✅ Starte OCR-Verarbeitung mit \(imageData.count) bytes")
 
-            let text = observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+        // Verwende OCRManager statt Vision direkt
+        OCRManager.shared.extractText(from: imageData, accuracy: .balanced) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let ocrResult):
+                    let text = ocrResult.text
 
-            if !text.isEmpty {
-                DispatchQueue.main.async {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(text, forType: .string)
-                    NSSound.beep()
+                    if !text.isEmpty {
+                        // Text in Zwischenablage kopieren
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(text, forType: .string)
+
+                        // Erfolgs-Feedback anzeigen
+                        self.ocrResultText = text
+                        self.showOCRAlert = true
+                        NSSound.beep()
+
+                        print("✅ OCR erfolgreich: \(text.prefix(50))... (Konfidenz: \(String(format: "%.1f%%", ocrResult.confidence * 100)), Sprache: \(ocrResult.detectedLanguage))")
+                    } else {
+                        self.showOCRError(message: "Kein Text im Bild gefunden")
+                    }
+
+                case .failure(let error):
+                    self.showOCRError(message: error.localizedDescription)
+                    print("❌ OCR Fehler: \(error.localizedDescription)")
                 }
             }
         }
+    }
 
-        request.recognitionLevel = .accurate
-        request.recognitionLanguages = ["de-DE", "en-US"]
+    private func showOCRError(message: String) {
+        ocrResultText = "Fehler: \(message)"
+        showOCRAlert = true
+    }
 
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        try? handler.perform([request])
+    // MARK: - Zentrierter OCR Alert
+    private func showCenteredOCRAlert() {
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = "OCR Erfolgreich"
+            alert.informativeText = "Text wurde erfolgreich in die Zwischenablage kopiert!\n\n\(self.ocrResultText.prefix(100))\(self.ocrResultText.count > 100 ? "..." : "")"
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+
+            // Platziere Alert in der Bildschirmmitte
+            if let screen = NSScreen.main {
+                let screenFrame = screen.visibleFrame
+                let alertWindow = alert.window
+
+                // Berechne Zentrumsposition
+                let centerX = screenFrame.midX - 250 // Alert ist ca. 500px breit
+                let centerY = screenFrame.midY - 100 // Alert ist ca. 200px hoch
+
+                alertWindow.setFrameOrigin(NSPoint(x: centerX, y: centerY))
+            }
+
+            // Setze Alert auf höchstes Level (ganz vorne)
+            alert.window.level = .floating
+
+            // Zeige Alert modal
+            alert.runModal()
+
+            // Reset State
+            self.showOCRAlert = false
+        }
     }
 
     // MARK: - Resize Handle

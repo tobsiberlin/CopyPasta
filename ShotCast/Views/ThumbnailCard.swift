@@ -256,18 +256,20 @@ struct ThumbnailCard: View {
     
     private func performOCR() {
         guard item.isImage, let imageData = item.imageData else { return }
-        
-        OCRManager.shared.extractText(from: imageData, accuracy: .balanced) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let ocrResult):
+
+        OCRManager.shared.extractText(from: imageData, accuracy: OCRManager.OCRAccuracy.balanced) { result in
+            switch result {
+            case .success(let ocrResult):
+                DispatchQueue.main.async {
                     onOCRExtract?(ocrResult.text)
                     print("✅ OCR text recognized: \(ocrResult.text.prefix(50))... (Confidence: \(String(format: "%.1f%%", ocrResult.confidence * 100)), Language: \(ocrResult.detectedLanguage))")
-                    
+
                     // Show success feedback (could be a toast notification)
                     // NotificationCenter.default.post(name: .ocrSuccess, object: ocrResult)
-                    
-                case .failure(let error):
+                }
+
+            case .failure(let error):
+                DispatchQueue.main.async {
                     print("❌ OCR error: \(error.localizedDescription)")
                     // Show error feedback
                     // NotificationCenter.default.post(name: .ocrError, object: error)
