@@ -9,6 +9,14 @@ class AppSettings: ObservableObject {
         didSet { UserDefaults.standard.set(barHeight, forKey: "barHeight") }
     }
     
+    @Published var screenshotSize: CGFloat {
+        didSet { 
+            UserDefaults.standard.set(screenshotSize, forKey: "screenshotSize")
+            // Bar-Höhe basierend auf Screenshot-Größe anpassen
+            barHeight = screenshotSize + 100 // 100px für Top-Bar + Padding + Dateityp-Label
+        }
+    }
+    
     @Published var maxItems: Int {
         didSet { UserDefaults.standard.set(maxItems, forKey: "maxItems") }
     }
@@ -19,6 +27,12 @@ class AppSettings: ObservableObject {
     
     @Published var barOpacity: Double {
         didSet { UserDefaults.standard.set(barOpacity, forKey: "barOpacity") }
+    }
+    
+    // Umgekehrte Transparenz für UI (100 = transparent, 0 = opak)
+    var transparencyPercentage: Double {
+        get { (1.0 - barOpacity) * 100 }
+        set { barOpacity = 1.0 - (newValue / 100.0) }
     }
     
     @Published var itemSpacing: CGFloat {
@@ -97,10 +111,12 @@ class AppSettings: ObservableObject {
     }
     
     private init() {
-        self.barHeight = UserDefaults.standard.object(forKey: "barHeight") as? CGFloat ?? 80
+        let defaultScreenshotSize: CGFloat = 176 // Doppelt so groß wie vorher (88 * 2)
+        self.screenshotSize = UserDefaults.standard.object(forKey: "screenshotSize") as? CGFloat ?? defaultScreenshotSize
+        self.barHeight = UserDefaults.standard.object(forKey: "barHeight") as? CGFloat ?? (defaultScreenshotSize + 100)
         self.maxItems = UserDefaults.standard.object(forKey: "maxItems") as? Int ?? 100
         self.autoShowOnCopy = UserDefaults.standard.object(forKey: "autoShowOnCopy") as? Bool ?? true
-        self.barOpacity = UserDefaults.standard.object(forKey: "barOpacity") as? Double ?? 0.95
+        self.barOpacity = UserDefaults.standard.object(forKey: "barOpacity") as? Double ?? 0.9
         self.itemSpacing = UserDefaults.standard.object(forKey: "itemSpacing") as? CGFloat ?? 12
         self.cornerRadius = UserDefaults.standard.object(forKey: "cornerRadius") as? CGFloat ?? 12
         self.hideDelay = UserDefaults.standard.object(forKey: "hideDelay") as? Double ?? 3.0
@@ -110,10 +126,11 @@ class AppSettings: ObservableObject {
     }
     
     func resetToDefaults() {
-        barHeight = 80
+        screenshotSize = 176
+        barHeight = screenshotSize + 100
         maxItems = 100
         autoShowOnCopy = true
-        barOpacity = 0.95
+        barOpacity = 0.9
         itemSpacing = 12
         cornerRadius = 12
         hideDelay = 3.0

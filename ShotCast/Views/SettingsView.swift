@@ -4,6 +4,7 @@ struct SettingsView: View {
     @StateObject private var settings = AppSettings.shared
     @Environment(\.colorScheme) var colorScheme
     @State private var selectedLanguage: String = "system"
+    @State private var showLivePreview: Bool = true
     
     private var effectiveColorScheme: ColorScheme {
         switch settings.themeMode {
@@ -35,6 +36,12 @@ struct SettingsView: View {
         .background(backgroundGradient)
         .preferredColorScheme(settings.themeMode == .system ? nil : 
                             (settings.themeMode == .light ? .light : .dark))
+        .onAppear {
+            startLivePreview()
+        }
+        .onDisappear {
+            stopLivePreview()
+        }
     }
     
     private var headerSection: some View {
@@ -132,13 +139,14 @@ struct SettingsView: View {
                         ForEach(AppSettings.ThemeMode.allCases, id: \.self) { mode in
                             HStack {
                                 Image(systemName: mode.icon)
+                                    .font(.system(size: 14))
                                 Text(mode.displayName)
                             }
                             .tag(mode)
                         }
                     }
-                    .pickerStyle(.menu)
-                    .frame(width: 120)
+                    .pickerStyle(.segmented)
+                    .frame(width: 200)
                 }
             }
         }
@@ -148,18 +156,21 @@ struct SettingsView: View {
         SettingsSection(title: "Erscheinungsbild", icon: "slider.horizontal.3") {
             VStack(spacing: 16) {
                 SliderSetting(
-                    title: "Bar Höhe",
-                    value: $settings.barHeight,
-                    range: 60...200,
+                    title: "Größe",
+                    value: $settings.screenshotSize,
+                    range: 100...300,
                     unit: "px"
                 )
                 
                 SliderSetting(
                     title: "Transparenz",
-                    value: $settings.barOpacity,
-                    range: 0.3...1.0,
+                    value: Binding(
+                        get: { settings.transparencyPercentage },
+                        set: { settings.transparencyPercentage = $0 }
+                    ),
+                    range: 0...70,
                     unit: "%",
-                    formatter: { String(format: "%.0f", $0 * 100) }
+                    formatter: { String(format: "%.0f", $0) }
                 )
                 
                 SliderSetting(
@@ -304,6 +315,34 @@ struct SettingsView: View {
             LanguageOption(id: "zh", name: "中文", flag: "🇨🇳")
         ]
     }
+    
+    // MARK: - Live Preview Funktionen
+    private func startLivePreview() {
+        // Trigger für Live-Updates aktivieren
+        showLivePreview = true
+        
+        // Bottom Bar automatisch anzeigen wenn Einstellungen geöffnet werden
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if settings.autoShowOnCopy {
+                NotificationCenter.default.post(
+                    name: Notification.Name("ShowBottomBarForPreview"),
+                    object: nil
+                )
+            }
+        }
+    }
+    
+    private func stopLivePreview() {
+        showLivePreview = false
+        
+        // Optional: Bottom Bar ausblenden wenn Einstellungen geschlossen werden
+        if !settings.autoShowOnCopy {
+            NotificationCenter.default.post(
+                name: Notification.Name("HideBottomBarAfterPreview"),
+                object: nil
+            )
+        }
+    }
 }
 
 struct LanguageOption {
@@ -418,6 +457,10 @@ struct SliderSetting: View {
                         .fill(Color.secondary.opacity(0.2))
                         .frame(height: 6)
                 )
+                .onChange(of: value) { _ in
+                    // Sofortige Live-Preview bei Änderungen
+                    triggerLivePreview()
+                }
         }
     }
     
@@ -426,6 +469,16 @@ struct SliderSetting: View {
             return formatter(value)
         } else {
             return "\(Int(value))\(unit)"
+        }
+    }
+    
+    private func triggerLivePreview() {
+        // Triggert sofortige Updates in der Bottom Bar
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: Notification.Name("SettingsLiveUpdate"),
+                object: nil
+            )
         }
     }
 }
@@ -463,8 +516,21 @@ struct ToggleSetting: View {
                 .labelsHidden()
                 .toggleStyle(SwitchToggleStyle(tint: .accentColor))
                 .scaleEffect(0.9)
+                .onChange(of: isOn) { _ in
+                    triggerLivePreview()
+                }
         }
         .padding(.vertical, 4)
+    }
+    
+    private func triggerLivePreview() {
+        // Triggert sofortige Updates in der Bottom Bar
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: Notification.Name("SettingsLiveUpdate"),
+                object: nil
+            )
+        }
     }
 }
 

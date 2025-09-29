@@ -128,6 +128,85 @@ class WindowManager: ObservableObject {
         window.setFrame(newFrame, display: true, animate: true)
     }
     
+    // MARK: - Resize Funktionalität
+    func resizeWindow(deltaWidth: CGFloat, fromLeft: Bool = false) {
+        guard let window = window else { return }
+        
+        let currentFrame = window.frame
+        var newFrame = currentFrame
+        
+        if fromLeft {
+            // Resize von links: Position und Breite ändern
+            newFrame.origin.x = max(0, currentFrame.origin.x - deltaWidth)
+            newFrame.size.width = max(200, currentFrame.width + deltaWidth)
+        } else {
+            // Resize von rechts: Nur Breite ändern
+            newFrame.size.width = max(200, currentFrame.width + deltaWidth)
+        }
+        
+        // Bildschirmgrenzen respektieren
+        if let screen = window.screen {
+            let screenFrame = screen.visibleFrame
+            let maxX = screenFrame.maxX
+            let maxWidth = maxX - newFrame.origin.x
+            
+            newFrame.size.width = min(newFrame.size.width, maxWidth)
+            newFrame.origin.x = max(screenFrame.minX, newFrame.origin.x)
+        }
+        
+        // Smooth Animation
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.1
+            context.allowsImplicitAnimation = true
+            window.setFrame(newFrame, display: true, animate: true)
+        }
+    }
+    
+    // MARK: - Drag-to-Move Funktionalität
+    func startDrag(at point: NSPoint) {
+        isDragging = true
+        dragStartPoint = point
+    }
+    
+    func continueDrag(to point: NSPoint) {
+        guard isDragging, let window = window else { return }
+        
+        let deltaX = point.x - dragStartPoint.x
+        let deltaY = point.y - dragStartPoint.y
+        
+        let currentFrame = window.frame
+        let newOrigin = NSPoint(
+            x: currentFrame.origin.x + deltaX,
+            y: currentFrame.origin.y + deltaY
+        )
+        
+        // Bildschirmgrenzen respektieren
+        if let screen = window.screen {
+            let screenFrame = screen.visibleFrame
+            let constrainedX = max(screenFrame.minX, min(screenFrame.maxX - currentFrame.width, newOrigin.x))
+            let constrainedY = max(screenFrame.minY, min(screenFrame.maxY - currentFrame.height, newOrigin.y))
+            
+            let newFrame = NSRect(
+                x: constrainedX,
+                y: constrainedY,
+                width: currentFrame.width,
+                height: currentFrame.height
+            )
+            
+            window.setFrame(newFrame, display: true)
+        }
+        
+        dragStartPoint = point
+    }
+    
+    func endDrag() {
+        isDragging = false
+        
+        // Optional: Snapping to edges
+        guard let window = window else { return }
+        snappingManager.snapToNearestEdge(window: window)
+    }
+    
     func resizeWindowHorizontally(delta: CGFloat) {
         guard let window = window, let screen = NSScreen.main else { return }
         
@@ -137,16 +216,17 @@ class WindowManager: ObservableObject {
         let maxWidth: CGFloat = screenFrame.width - 40
         
         let newWidth = max(minWidth, min(maxWidth, currentFrame.width + delta))
-        let newX = screenFrame.midX - newWidth / 2  // Zentriert halten
-        
         let newFrame = NSRect(
-            x: newX,
+            x: currentFrame.origin.x,
             y: currentFrame.origin.y,
             width: newWidth,
             height: currentFrame.height
         )
         
-        window.setFrame(newFrame, display: true, animate: true)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.1
+            window.setFrame(newFrame, display: true, animate: true)
+        }
     }
     
     private func scheduleAutoHide() {

@@ -313,18 +313,18 @@ struct ClipboardItem: Identifiable, Codable {
         }
         
         var sourceBadge: String? {
-            // Spezielle Source-Badges wie im Screenshot
+            // Spezielle Source-Badges wie im Screenshot - immer anzeigen
             switch self {
             case .image: return "S" // Screenshot badge
-            case .text: return nil
+            case .text: return "T" // Text badge
             case .document: return "D" // Document badge
             case .pdf: return "P" // PDF badge  
             case .video: return "V" // Video badge
             case .audio: return "A" // Audio badge
             case .archive: return "Z" // Zip badge
-            case .url: return "🔗" // Link emoji
-            case .code: return "</>" // Code bracket
-            case .other: return "?"
+            case .url: return "L" // Link badge
+            case .code: return "C" // Code badge
+            case .other: return "F" // File badge
             }
         }
         
@@ -357,6 +357,38 @@ struct ClipboardItem: Identifiable, Codable {
             case .url: return .teal.opacity(0.9)
             case .code: return .indigo.opacity(0.9)
             case .other: return .gray.opacity(0.9)
+            }
+        }
+        
+        var color: Color {
+            // Hauptfarben für die Icon-Darstellung
+            switch self {
+            case .image: return .blue
+            case .text: return .green
+            case .document: return .indigo
+            case .pdf: return .red
+            case .video: return .purple
+            case .audio: return .orange
+            case .archive: return .brown
+            case .url: return .teal
+            case .code: return .purple
+            case .other: return .gray
+            }
+        }
+        
+        var displayName: String {
+            // Anzeigename für den Dateityp
+            switch self {
+            case .image: return "Bild"
+            case .text: return "Text" 
+            case .document: return "Dokument"
+            case .pdf: return "PDF"
+            case .video: return "Video"
+            case .audio: return "Audio"
+            case .archive: return "Archiv"
+            case .url: return "URL"
+            case .code: return "Code"
+            case .other: return "Datei"
             }
         }
     }

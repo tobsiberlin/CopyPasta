@@ -1,15 +1,21 @@
 import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
+import Vision
 
 struct BottomBarView: View {
     @StateObject private var pasteboardWatcher = PasteboardWatcher.shared
     @StateObject private var settings = AppSettings.shared
     @StateObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var windowManager = WindowManager.shared
     @Environment(\.colorScheme) var colorScheme
     
     @State private var selectedItem: ClipboardItem?
     @State private var hoveredItemID: UUID?
+    @State private var scrollOffset: CGFloat = 0
+    @State private var showScrollButtons: Bool = false
+    @State private var currentScrollIndex: Int = 0
+    @State private var scrollProxy: ScrollViewReader.ScrollViewProxy?
     
     var filteredItems: [ClipboardItem] {
         let items = pasteboardWatcher.clipboardItems
@@ -27,78 +33,295 @@ struct BottomBarView: View {
         }
     }
     
+    private var canScrollLeft: Bool {
+        currentScrollIndex > 0
+    }
+    
+    private var canScrollRight: Bool {
+        currentScrollIndex < max(0, filteredItems.count - visibleItemsCount)
+    }
+    
+    private var visibleItemsCount: Int {
+        // Estimate how many items fit in the visible area
+        let itemWidth = settings.screenshotSize + settings.itemSpacing
+        let availableWidth = 600 // Approximate container width
+        return max(1, Int(availableWidth / itemWidth))
+    }
+    
     var body: some View {
-        // EXAKT WIE PASTE - sauber und minimalistisch
-        if filteredItems.isEmpty {
-            emptyStateView
-        } else {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) { // Sehr enger Abstand
-                    ForEach(filteredItems) { item in
-                        pasteStyleCard(item: item)
+        ZStack {
+            VStack(spacing: 0) {
+                // Top bar mit Einstellungen und Schließen-Button
+                HStack {
+                    // Einstellungen-Button links
+                    Button(action: {
+                        SettingsWindowManager.shared.showSettingsWindow()
+                    }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                            .padding(8)
+                            .background(Circle().fill(Color.gray.opacity(0.1)))
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Spacer()
+                    
+                    // Drag-Handle in der Mitte
+                    Image(systemName: "rectangle.3.group")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray.opacity(0.6))
+                        .padding(.vertical, 4)
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    let currentLocation = NSEvent.mouseLocation
+                                    windowManager.continueDrag(to: currentLocation)
+                                }
+                                .onEnded { _ in
+                                    windowManager.endDrag()
+                                }
+                        )
+                        .onHover { isHovering in
+                            if isHovering {
+                                NSCursor.openHand.set()
+                            } else {
+                                NSCursor.arrow.set()
+                            }
+                        }
+                    
+                    Spacer()
+                    
+                    // Schließen-Button rechts
+                    Button(action: {
+                        // Bar ausblenden - TODO: Verbessern mit Window Manager
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            NSApp.keyWindow?.orderOut(nil)
+                        }
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                            .padding(8)
+                            .background(Circle().fill(Color.gray.opacity(0.1)))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                .frame(height: 32)
+                
+                // Main content area
+                if filteredItems.isEmpty {
+                    emptyStateView
+                } else {
+                    // Hauptbereich mit professioneller Karussell-Navigation
+                    HStack(spacing: 0) {
+                        // Linker Scroll-Button mit Fade-Effekt
+                        if showScrollButtons {
+                            Button(action: {
+                                scrollToPrevious()
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 32, height: 32)
+                                    .background(
+                                        Circle()
+                                            .fill(.ultraThinMaterial)
+                                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .opacity(canScrollLeft ? 1.0 : 0.3)
+                            .animation(.easeInOut(duration: 0.2), value: canScrollLeft)
+                            .padding(.leading, 8)
+                        }
+                        
+                        // Screenshot-ScrollView mit ScrollViewReader
+                        ScrollViewReader { proxy in
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: settings.itemSpacing) {
+                                    ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                                        pasteStyleCard(item: item)
+                                            .id(index)
+                                            .scaleEffect(selectedItem?.id == item.id ? 1.05 : 1.0)
+                                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedItem?.id)
+                                    }
+                                }
+                                .padding(.horizontal, showScrollButtons ? 8 : 12)
+                                .padding(.bottom, 12)
+                                .background(
+                                    GeometryReader { geometry in
+                                        Color.clear
+                                            .onAppear {
+                                                updateScrollButtonVisibility(contentWidth: geometry.size.width)
+                                            }
+                                            .onChange(of: filteredItems.count) { _ in
+                                                updateScrollButtonVisibility(contentWidth: geometry.size.width)
+                                            }
+                                    }
+                                )
+                            }
+                            .onChange(of: selectedItem) { item in
+                                if let item = item,
+                                   let index = filteredItems.firstIndex(where: { $0.id == item.id }) {
+                                    withAnimation(.easeInOut(duration: 0.5)) {
+                                        proxy.scrollTo(index, anchor: .center)
+                                    }
+                                }
+                            }
+                            .onAppear {
+                                scrollProxy = proxy
+                            }
+                        }
+                        
+                        // Rechter Scroll-Button mit Fade-Effekt
+                        if showScrollButtons {
+                            Button(action: {
+                                scrollToNext()
+                            }) {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 32, height: 32)
+                                    .background(
+                                        Circle()
+                                            .fill(.ultraThinMaterial)
+                                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .opacity(canScrollRight ? 1.0 : 0.3)
+                            .animation(.easeInOut(duration: 0.2), value: canScrollRight)
+                            .padding(.trailing, 8)
+                        }
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
             }
+            .background(
+                // Umrandung und Hintergrund wie bei Paste mit weniger Transparenz
+                RoundedRectangle(cornerRadius: settings.cornerRadius)
+                    .fill(Color.white.opacity(0.9)) // Noch weniger transparent
+                    .stroke(Color.gray.opacity(0.5), lineWidth: 1.5) // Sichtbarerer Rand
+                    .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 8) // Stärkere Schatten
+            )
+            
+            // Resize handles
+            resizeHandles
+        }
+        .frame(height: settings.barHeight)
+        .opacity(settings.barOpacity)
+        .preferredColorScheme(preferredColorScheme)
+        .onAppear {
+            setupKeyboardShortcuts()
+            setupLivePreviewListener()
+        }
+        .onDisappear {
+            removeKeyboardShortcuts()
         }
     }
     
     private func pasteStyleCard(item: ClipboardItem) -> some View {
-        ZStack {
-            // Weißer Hintergrund mit Schatten
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.white)
-                .frame(width: 68, height: 68)
-                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(selectedItem?.id == item.id ? Color.blue : Color.clear, lineWidth: 2)
-                )
+        VStack(spacing: 8) {
+            // Dateiname über dem Screenshot
+            Text(getOriginalFileName(for: item))
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(width: settings.screenshotSize)
             
-            // Inhalt
-            if item.isImage, let imageData = item.imageData, let nsImage = NSImage(data: imageData) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 64, height: 64)
-                    .clipped()
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
-            } else {
-                VStack(spacing: 4) {
-                    Image(systemName: item.fileTypeCategory.icon)
-                        .font(.system(size: 20))
-                        .foregroundColor(.gray)
-                    
-                    Text(fileTypeText(for: item))
-                        .font(.system(size: 8, weight: .medium))
-                        .foregroundColor(.gray)
-                }
-            }
-            
-            // Source Badge
-            VStack {
-                HStack {
-                    Spacer()
-                    if let sourceInfo = item.sourceInfo, let badge = sourceInfo.badge {
-                        Text(badge)
-                            .font(.system(size: 8, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 16, height: 16)
-                            .background(Circle().fill(Color.red))
-                            .offset(x: 6, y: -6)
+            ZStack {
+                // Größere Screenshots - wie bei Paste  
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white)
+                    .frame(width: settings.screenshotSize, height: settings.screenshotSize)
+                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(selectedItem?.id == item.id ? Color.blue : Color.gray.opacity(0.2), lineWidth: selectedItem?.id == item.id ? 2 : 1)
+                    )
+                
+                // Bessere Bilddarstellung - quadratisch wie bei Paste
+                if item.isImage, let imageData = item.imageData, let nsImage = NSImage(data: imageData) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: settings.screenshotSize - 4, height: settings.screenshotSize - 4)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .saturation(1.2) // Mehr Sättigung für bessere Erkennbarkeit
+                        .contrast(1.1) // Mehr Kontrast
+                } else {
+                    VStack(spacing: 6) {
+                        Image(systemName: item.fileTypeCategory.icon)
+                            .font(.system(size: 28)) // Größeres Icon
+                            .foregroundColor(.gray)
+                        
+                        Text(fileTypeText(for: item))
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.gray)
                     }
                 }
-                Spacer()
+                
+                // Source Badge rechts oben - IMMER SICHTBAR, komplett innerhalb der Karte
+                VStack {
+                    HStack {
+                        Spacer()
+                        // Badge immer anzeigen - zuerst Source, dann Dateityp
+                        let badgeText = item.sourceInfo?.badge ?? item.fileTypeCategory.sourceBadge ?? "?"
+                        let badgeColor = item.sourceInfo?.badge != nil ? Color.red : item.fileTypeCategory.badgeColor
+                        
+                        Text(badgeText)
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 16, height: 16)
+                            .background(Circle().fill(badgeColor))
+                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                            .offset(x: -4, y: 4) // Komplett innerhalb
+                    }
+                    Spacer()
+                }
             }
+            
+            // Dateityp unterhalb des Screenshots
+            HStack {
+                Image(systemName: item.fileTypeCategory.icon)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(item.fileTypeCategory.color)
+                Text(item.fileTypeCategory.displayName)
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(Color.gray.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .onTapGesture {
-            selectedItem = item
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                selectedItem = item
+            }
+            
+            // Haptic feedback für professionelles Gefühl
+            let feedback = NSHapticFeedbackManager.defaultPerformer
+            feedback.perform(.alignment, performanceTime: .now)
+            
             copyItemToPasteboard(item)
         }
         .onHover { isHovered in
-            hoveredItemID = isHovered ? item.id : nil
+            withAnimation(.easeInOut(duration: 0.15)) {
+                hoveredItemID = isHovered ? item.id : nil
+            }
         }
+        .scaleEffect(hoveredItemID == item.id ? 1.02 : 1.0)
+        .shadow(
+            color: hoveredItemID == item.id ? .black.opacity(0.15) : .clear,
+            radius: hoveredItemID == item.id ? 8 : 0,
+            x: 0, y: 4
+        )
+        .animation(.easeInOut(duration: 0.2), value: hoveredItemID)
         .contextMenu {
             contextMenu(for: item)
         }
@@ -132,6 +355,58 @@ struct BottomBarView: View {
         }
     }
     
+    private func getOriginalFileName(for item: ClipboardItem) -> String {
+        // Zeigt den ursprünglichen Dateinamen für kopierte Dateien
+        if let fileName = item.fileName {
+            return fileName
+        } else if item.isImage {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm"
+            let timeString = formatter.string(from: item.timestamp)
+            
+            switch item.contentType {
+            case .png: return "Bild \(timeString).png"
+            case .jpeg: return "Bild \(timeString).jpg"
+            case .heic: return "Bild \(timeString).heic"
+            default: return "Bild \(timeString)"
+            }
+        } else if item.isURL {
+            if let urlString = item.urlString, let url = URL(string: urlString) {
+                return url.host ?? "URL"
+            }
+            return "URL"
+        } else {
+            return item.fileTypeCategory.displayName
+        }
+    }
+    
+    private func getDetailedFileName(for item: ClipboardItem) -> String {
+        // Detaillierte Namen wie bei Paste
+        if item.isImage {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm"
+            let timeString = formatter.string(from: item.timestamp)
+            
+            switch item.contentType {
+            case .png: return "Bild \(timeString).png"
+            case .jpeg: return "Bild \(timeString).jpg"
+            case .heic: return "Bild \(timeString).heic"
+            default: return "Bild \(timeString)"
+            }
+        } else if let fileName = item.fileName {
+            return fileName
+        } else if item.isText {
+            return "Text"
+        } else if item.isURL {
+            if let urlString = item.urlString, let url = URL(string: urlString) {
+                return url.host ?? "URL"
+            }
+            return "URL"
+        } else {
+            return fileTypeText(for: item)
+        }
+    }
+    
     private func copyItemToPasteboard(_ item: ClipboardItem) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
@@ -146,6 +421,72 @@ struct BottomBarView: View {
         NSSound.beep()
     }
     
+    // MARK: - Resize Handles
+    private var resizeHandles: some View {
+        ZStack {
+            // Linker Resize-Handle mit sichtbarem Icon
+            HStack {
+                VStack {
+                    Spacer()
+                    Image(systemName: "arrow.left.and.right")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray.opacity(0.7))
+                        .padding(.leading, 2)
+                    Spacer()
+                }
+                .frame(width: 12)
+                .contentShape(Rectangle())
+                .onHover { isHovering in
+                    if isHovering {
+                        NSCursor.resizeLeftRight.set()
+                    } else {
+                        NSCursor.arrow.set()
+                    }
+                }
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            // Resize von links - verändert Position und Breite
+                            let deltaWidth = value.translation.width
+                            windowManager.resizeWindow(deltaWidth: deltaWidth, fromLeft: true)
+                        }
+                )
+                Spacer()
+            }
+            
+            // Rechter Resize-Handle mit sichtbarem Icon 
+            HStack {
+                Spacer()
+                VStack {
+                    Spacer()
+                    Image(systemName: "arrow.left.and.right")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray.opacity(0.7))
+                        .padding(.trailing, 2)
+                    Spacer()
+                }
+                .frame(width: 12)
+                .contentShape(Rectangle())
+                .onHover { isHovering in
+                    if isHovering {
+                        NSCursor.resizeLeftRight.set()
+                    } else {
+                        NSCursor.arrow.set()
+                    }
+                }
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            // Resize von rechts - verändert nur Breite
+                            let deltaWidth = value.translation.width
+                            windowManager.resizeWindow(deltaWidth: deltaWidth, fromLeft: false)
+                        }
+                )
+            }
+        }
+    }
+    
+    // MARK: - Context Menu mit "Speichern unter"
     private func contextMenu(for item: ClipboardItem) -> some View {
         Group {
             Button(localizationManager.localizedString(.contextCopy)) {
@@ -158,9 +499,283 @@ struct BottomBarView: View {
             
             Divider()
             
+            // OCR - nur für Bilder
+            if item.isImage {
+                Button("Texterkennung / OCR") {
+                    performOCR(on: item)
+                }
+                
+                Divider()
+            }
+            
+            // Speichern unter - nur für Bilder und Dateien
+            if item.isImage || item.isFile {
+                Button("Speichern unter...") {
+                    saveItemAs(item)
+                }
+                
+                Divider()
+            }
+            
             Button(localizationManager.localizedString(.contextDelete)) {
                 pasteboardWatcher.deleteItem(item)
             }
+        }
+    }
+    
+    // MARK: - Speichern unter Funktion
+    private func saveItemAs(_ item: ClipboardItem) {
+        DispatchQueue.main.async {
+            let savePanel = NSSavePanel()
+            savePanel.title = "Datei speichern"
+            savePanel.showsResizeIndicator = true
+            savePanel.showsHiddenFiles = false
+            savePanel.canCreateDirectories = true
+            
+            // Dateiname und Extension basierend auf Item-Typ setzen
+            if item.isImage {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+                let timestamp = formatter.string(from: item.timestamp)
+                
+                switch item.contentType {
+                case .png:
+                    savePanel.nameFieldStringValue = "Screenshot-\(timestamp).png"
+                    savePanel.allowedContentTypes = [.png]
+                case .jpeg:
+                    savePanel.nameFieldStringValue = "Screenshot-\(timestamp).jpg"
+                    savePanel.allowedContentTypes = [.jpeg]
+                case .heic:
+                    savePanel.nameFieldStringValue = "Screenshot-\(timestamp).heic"
+                    savePanel.allowedContentTypes = [.heic]
+                default:
+                    savePanel.nameFieldStringValue = "Screenshot-\(timestamp).png"
+                    savePanel.allowedContentTypes = [.png]
+                }
+            } else if let fileName = item.fileName {
+                savePanel.nameFieldStringValue = fileName
+            } else {
+                savePanel.nameFieldStringValue = "Datei.txt"
+            }
+            
+            savePanel.begin { response in
+                if response == .OK, let url = savePanel.url {
+                    self.saveItemToURL(item, url: url)
+                }
+            }
+        }
+    }
+    
+    private func saveItemToURL(_ item: ClipboardItem, url: URL) {
+        do {
+            if let imageData = item.imageData {
+                try imageData.write(to: url)
+            } else if let fileData = item.fileData {
+                try fileData.write(to: url)
+            } else if let textContent = item.textContent {
+                try textContent.write(to: url, atomically: true, encoding: .utf8)
+            }
+            
+            // Erfolgsmeldung
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(
+                    name: Notification.Name("ToastNotification"),
+                    object: nil,
+                    userInfo: ["message": "Erfolgreich gespeichert"]
+                )
+            }
+        } catch {
+            print("❌ Fehler beim Speichern: \(error.localizedDescription)")
+            
+            // Fehlermeldung
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(
+                    name: Notification.Name("ToastNotification"),
+                    object: nil,
+                    userInfo: ["message": "Fehler beim Speichern: \(error.localizedDescription)"]
+                )
+            }
+        }
+    }
+    
+    // MARK: - OCR Funktionalität
+    private func performOCR(on item: ClipboardItem) {
+        guard let imageData = item.imageData,
+              let image = NSImage(data: imageData),
+              let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            showOCRResult("Fehler: Bild konnte nicht verarbeitet werden")
+            return
+        }
+        
+        let request = VNRecognizeTextRequest { request, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.showOCRResult("OCR-Fehler: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                    self.showOCRResult("Kein Text im Bild erkannt")
+                    return
+                }
+                
+                let recognizedText = observations.compactMap { observation in
+                    return observation.topCandidates(1).first?.string
+                }.joined(separator: "\n")
+                
+                if recognizedText.isEmpty {
+                    self.showOCRResult("Kein Text im Bild erkannt")
+                } else {
+                    // Text in Zwischenablage kopieren
+                    let pasteboard = NSPasteboard.general
+                    pasteboard.clearContents()
+                    pasteboard.setString(recognizedText, forType: .string)
+                    
+                    self.showOCRResult(recognizedText)
+                }
+            }
+        }
+        
+        // Verbesserte OCR-Einstellungen
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        request.recognitionLanguages = ["de-DE", "en-US"] // Deutsch und Englisch
+        
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform([request])
+            } catch {
+                DispatchQueue.main.async {
+                    self.showOCRResult("OCR-Fehler: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    private func showOCRResult(_ text: String) {
+        // Einfaches Alert als OCR-Fenster
+        let alert = NSAlert()
+        alert.messageText = "Texterkennung"
+        alert.informativeText = "Folgender Inhalt wurde in die Zwischenablage kopiert und kann nun eingefügt werden:\n\n\"\(text)\""
+        alert.addButton(withTitle: "OK")
+        alert.alertStyle = .informational
+        
+        // Alert in eigenem Thread anzeigen 
+        DispatchQueue.main.async {
+            alert.runModal()
+        }
+    }
+    
+    // MARK: - Karussell-Navigation Funktionen
+    private func scrollToPrevious() {
+        let newIndex = max(0, currentScrollIndex - 1)
+        scrollToIndex(newIndex)
+    }
+    
+    private func scrollToNext() {
+        let maxIndex = max(0, filteredItems.count - visibleItemsCount)
+        let newIndex = min(maxIndex, currentScrollIndex + 1)
+        scrollToIndex(newIndex)
+    }
+    
+    private func scrollToIndex(_ index: Int) {
+        guard let proxy = scrollProxy, index >= 0, index < filteredItems.count else { return }
+        
+        withAnimation(.easeInOut(duration: 0.4)) {
+            proxy.scrollTo(index, anchor: .leading)
+            currentScrollIndex = index
+        }
+        
+        // Haptic feedback für professionelles Gefühl
+        let feedback = NSHapticFeedbackManager.defaultPerformer
+        feedback.perform(.generic, performanceTime: .now)
+    }
+    
+    private func updateScrollButtonVisibility(contentWidth: CGFloat) {
+        DispatchQueue.main.async {
+            // Show scroll buttons if content overflows
+            let containerWidth = 600 // Approximate
+            showScrollButtons = contentWidth > containerWidth && filteredItems.count > visibleItemsCount
+        }
+    }
+    
+    // MARK: - Keyboard Shortcuts für Weltklasse-UX
+    private func setupKeyboardShortcuts() {
+        // Command+1-9 für schnelle Item-Auswahl
+        let _ = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self,
+                  event.modifierFlags.contains(.command) else { return event }
+            
+            switch event.keyCode {
+            case 18...26: // Zahlen 1-9
+                let index = Int(event.keyCode) - 18
+                if index < self.filteredItems.count {
+                    let item = self.filteredItems[index]
+                    DispatchQueue.main.async {
+                        self.selectedItem = item
+                        self.copyItemToPasteboard(item)
+                    }
+                    return nil // Event verbraucht
+                }
+            case 123: // Pfeil links
+                DispatchQueue.main.async {
+                    self.scrollToPrevious()
+                }
+                return nil
+            case 124: // Pfeil rechts
+                DispatchQueue.main.async {
+                    self.scrollToNext()
+                }
+                return nil
+            case 53: // Escape
+                DispatchQueue.main.async {
+                    self.windowManager.hideWindow()
+                }
+                return nil
+            default:
+                break
+            }
+            
+            return event
+        }
+    }
+    
+    private func removeKeyboardShortcuts() {
+        // Cleanup wird automatisch von NSEvent gemacht
+    }
+    
+    // MARK: - Live Preview Listener
+    private func setupLivePreviewListener() {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("SettingsLiveUpdate"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            // Sofortige UI-Updates bei Settings-Änderungen
+            windowManager.updateWindowFrame()
+            
+            // Smooth Transition Animation
+            withAnimation(.easeInOut(duration: 0.2)) {
+                // Views werden automatisch updated durch @StateObject bindings
+            }
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("ShowBottomBarForPreview"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            windowManager.showWindow()
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("HideBottomBarAfterPreview"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            windowManager.hideWindow()
         }
     }
 }
