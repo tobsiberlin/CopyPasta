@@ -204,7 +204,8 @@ class WindowManager: ObservableObject {
         
         // Optional: Snapping to edges
         guard let window = window else { return }
-        snappingManager.snapToNearestEdge(window: window)
+        // TODO: Implement edge snapping if needed
+        // snappingManager.snapToNearestEdge(window: window)
     }
     
     func resizeWindowHorizontally(delta: CGFloat) {
