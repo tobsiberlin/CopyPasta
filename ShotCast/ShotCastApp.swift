@@ -8,7 +8,7 @@ struct ShotCastApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        MenuBarExtra("ShotCast", systemImage: "photo.on.rectangle.angled") {
+        MenuBarExtra("ShotCast", systemImage: "viewfinder.rectangular") {
             MenuBarView()
         }
         .menuBarExtraStyle(.window)
@@ -73,4 +73,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         return true
     }
+    
+    
 }
