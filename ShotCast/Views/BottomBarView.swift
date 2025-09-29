@@ -354,7 +354,7 @@ struct BottomBarView: View {
                 .shadow(color: .accentColor.opacity(0.4), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(.plain)
-        .help("ShotDrop Einstellungen")
+        .help("ShotCast Einstellungen")
         .onHover { isHovered in
             withAnimation(.easeInOut(duration: 0.3)) {
                 if isHovered {
@@ -407,7 +407,7 @@ struct BottomBarView: View {
                 .shadow(color: .red.opacity(0.4), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(.plain)
-        .help("ShotDrop schließen")
+        .help("ShotCast schließen")
         .onHover { isHovered in
             withAnimation(.easeInOut(duration: 0.3)) {
                 if isHovered {
@@ -523,7 +523,7 @@ struct BottomBarView: View {
         
         if item.isImage {
             savePanel.allowedContentTypes = [item.contentType]
-            savePanel.nameFieldStringValue = "ShotDrop_\(Int(item.timestamp.timeIntervalSince1970))"
+            savePanel.nameFieldStringValue = "ShotCast_\(Int(item.timestamp.timeIntervalSince1970))"
             
             savePanel.begin { result in
                 if result == .OK, let url = savePanel.url, let imageData = item.imageData {
@@ -532,7 +532,7 @@ struct BottomBarView: View {
             }
         } else if item.isText {
             savePanel.allowedContentTypes = [.plainText]
-            savePanel.nameFieldStringValue = "ShotDrop_Text_\(Int(item.timestamp.timeIntervalSince1970)).txt"
+            savePanel.nameFieldStringValue = "ShotCast_Text_\(Int(item.timestamp.timeIntervalSince1970)).txt"
             
             savePanel.begin { result in
                 if result == .OK, let url = savePanel.url, let textContent = item.textContent {
@@ -545,7 +545,7 @@ struct BottomBarView: View {
     private func handleDoubleClick(item: ClipboardItem) {
         if item.isImage, let imageData = item.imageData {
             // Öffne Bild in Preview
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ShotDrop_\(UUID().uuidString).png")
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ShotCast_\(UUID().uuidString).png")
             
             do {
                 try imageData.write(to: tempURL)
@@ -560,7 +560,7 @@ struct BottomBarView: View {
             }
         } else if item.isText, let textContent = item.textContent {
             // Öffne Text in TextEdit
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ShotDrop_\(UUID().uuidString).txt")
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ShotCast_\(UUID().uuidString).txt")
             
             do {
                 try textContent.write(to: tempURL, atomically: true, encoding: .utf8)

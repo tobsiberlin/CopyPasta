@@ -1,21 +1,14 @@
-//
-//  ShotDropApp.swift
-//  ShotDrop
-//
-//  Created by Tobias Mattern on 28.09.25.
-//
-
 import SwiftUI
 import AppKit
 
 @main
-struct ShotDropApp: App {
+struct ShotCastApp: App {
     @StateObject private var pasteboardWatcher = PasteboardWatcher.shared
     @StateObject private var windowManager = WindowManager.shared
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        MenuBarExtra("ShotDrop", systemImage: "photo.on.rectangle.angled") {
+        MenuBarExtra("ShotCast", systemImage: "photo.on.rectangle.angled") {
             MenuBarView()
         }
         .menuBarExtraStyle(.window)
@@ -25,7 +18,7 @@ struct ShotDropApp: App {
 struct MenuBarView: View {
     var body: some View {
         VStack {
-            Button("ShotDrop öffnen") {
+            Button("ShotCast öffnen") {
                 WindowManager.shared.showWindow()
                 NSApp.activate(ignoringOtherApps: true)
             }
@@ -55,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         self.pasteboardWatcher = PasteboardWatcher.shared
         
-        print("✅ AppDelegate: PasteboardWatcher Singleton initialisiert")
+        print("✅ ShotCast: PasteboardWatcher gestartet")
         
         NotificationCenter.default.addObserver(
             self,
@@ -66,7 +59,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func handleAutoActivation() {
-        print("📱 handleAutoActivation aufgerufen")
+        print("📱 Auto-Aktivierung: Bottom Bar wird angezeigt")
         windowManager.showWindow(animated: true)
     }
     

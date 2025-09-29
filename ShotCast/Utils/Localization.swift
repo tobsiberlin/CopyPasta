@@ -107,14 +107,14 @@ enum LocalizedString {
     
     // Shortcuts
     case hotkeys
-    case openShotDrop
+    case openShotCast
     case globalHotkey
     case changeButton
     case recordingPrompt
     case hotkeyPlaceholder
     
     // About
-    case aboutShotDrop
+    case aboutShotCast
     case version
     case universalClipboard
     
@@ -171,7 +171,7 @@ enum LocalizedString {
     // MARK: - English Strings
     private var englishStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "Universal Clipboard for macOS"
         case .tabGeneral: return "General"
         case .tabShots: return "Shots"
@@ -202,16 +202,16 @@ enum LocalizedString {
         case .cornerRadius: return "Corner radius"
         case .shotSpacing: return "Shot spacing"
         case .hotkeys: return "Hotkeys"
-        case .openShotDrop: return "Open ShotDrop"
-        case .globalHotkey: return "Global hotkey to open ShotDrop"
+        case .openShotCast: return "Open ShotCast"
+        case .globalHotkey: return "Global hotkey to open ShotCast"
         case .changeButton: return "Change"
         case .recordingPrompt: return "Press the desired key combination..."
         case .hotkeyPlaceholder: return "🚧 Hotkey functionality will be implemented"
-        case .aboutShotDrop: return "About ShotDrop"
+        case .aboutShotCast: return "About ShotCast"
         case .version: return "Version 1.0"
         case .universalClipboard: return "Universal Clipboard Manager for macOS"
-        case .settingsTooltip: return "ShotDrop Settings"
-        case .closeTooltip: return "Close ShotDrop"
+        case .settingsTooltip: return "ShotCast Settings"
+        case .closeTooltip: return "Close ShotCast"
         case .ocrTooltip: return "Extract text via OCR"
         case .noClipboardContent: return "No clipboard content"
         case .copyButton: return "Copy"
@@ -236,7 +236,7 @@ enum LocalizedString {
     // MARK: - German Strings
     private var germanStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "Universal Clipboard für macOS"
         case .tabGeneral: return "Allgemein"
         case .tabShots: return "Shots"
@@ -267,16 +267,16 @@ enum LocalizedString {
         case .cornerRadius: return "Ecken Rundung"
         case .shotSpacing: return "Shot Abstand"
         case .hotkeys: return "Tastenkombinationen"
-        case .openShotDrop: return "ShotDrop öffnen"
-        case .globalHotkey: return "Globale Tastenkombination zum Öffnen von ShotDrop"
+        case .openShotCast: return "ShotCast öffnen"
+        case .globalHotkey: return "Globale Tastenkombination zum Öffnen von ShotCast"
         case .changeButton: return "Ändern"
         case .recordingPrompt: return "Drücken Sie die gewünschte Tastenkombination..."
         case .hotkeyPlaceholder: return "🚧 Hotkey-Funktionalität wird implementiert"
-        case .aboutShotDrop: return "Über ShotDrop"
+        case .aboutShotCast: return "Über ShotCast"
         case .version: return "Version 1.0"
         case .universalClipboard: return "Universal Clipboard Manager für macOS"
-        case .settingsTooltip: return "ShotDrop Einstellungen"
-        case .closeTooltip: return "ShotDrop schließen"
+        case .settingsTooltip: return "ShotCast Einstellungen"
+        case .closeTooltip: return "ShotCast schließen"
         case .ocrTooltip: return "Text per OCR extrahieren"
         case .noClipboardContent: return "Keine Inhalte im Clipboard"
         case .copyButton: return "Kopieren"
@@ -301,7 +301,7 @@ enum LocalizedString {
     // MARK: - Italian Strings
     private var italianStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "Clipboard Universale per macOS"
         case .tabGeneral: return "Generale"
         case .tabShots: return "Shots"
@@ -332,16 +332,16 @@ enum LocalizedString {
         case .cornerRadius: return "Raggio angoli"
         case .shotSpacing: return "Spaziatura shot"
         case .hotkeys: return "Tasti rapidi"
-        case .openShotDrop: return "Apri ShotDrop"
-        case .globalHotkey: return "Tasto rapido globale per aprire ShotDrop"
+        case .openShotCast: return "Apri ShotCast"
+        case .globalHotkey: return "Tasto rapido globale per aprire ShotCast"
         case .changeButton: return "Cambia"
         case .recordingPrompt: return "Premi la combinazione di tasti desiderata..."
         case .hotkeyPlaceholder: return "🚧 Funzionalità tasti rapidi sarà implementata"
-        case .aboutShotDrop: return "Informazioni su ShotDrop"
+        case .aboutShotCast: return "Informazioni su ShotCast"
         case .version: return "Versione 1.0"
         case .universalClipboard: return "Gestore Clipboard Universale per macOS"
-        case .settingsTooltip: return "Impostazioni ShotDrop"
-        case .closeTooltip: return "Chiudi ShotDrop"
+        case .settingsTooltip: return "Impostazioni ShotCast"
+        case .closeTooltip: return "Chiudi ShotCast"
         case .ocrTooltip: return "Estrai testo tramite OCR"
         case .noClipboardContent: return "Nessun contenuto negli appunti"
         case .copyButton: return "Copia"
@@ -366,7 +366,7 @@ enum LocalizedString {
     // MARK: - Spanish Strings
     private var spanishStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "Portapapeles Universal para macOS"
         case .tabGeneral: return "General"
         case .tabShots: return "Shots"
@@ -397,16 +397,16 @@ enum LocalizedString {
         case .cornerRadius: return "Radio de esquinas"
         case .shotSpacing: return "Espaciado de shot"
         case .hotkeys: return "Teclas de acceso rápido"
-        case .openShotDrop: return "Abrir ShotDrop"
-        case .globalHotkey: return "Tecla de acceso rápido global para abrir ShotDrop"
+        case .openShotCast: return "Abrir ShotCast"
+        case .globalHotkey: return "Tecla de acceso rápido global para abrir ShotCast"
         case .changeButton: return "Cambiar"
         case .recordingPrompt: return "Presiona la combinación de teclas deseada..."
         case .hotkeyPlaceholder: return "🚧 Funcionalidad de teclas rápidas será implementada"
-        case .aboutShotDrop: return "Acerca de ShotDrop"
+        case .aboutShotCast: return "Acerca de ShotCast"
         case .version: return "Versión 1.0"
         case .universalClipboard: return "Gestor de Portapapeles Universal para macOS"
-        case .settingsTooltip: return "Configuración de ShotDrop"
-        case .closeTooltip: return "Cerrar ShotDrop"
+        case .settingsTooltip: return "Configuración de ShotCast"
+        case .closeTooltip: return "Cerrar ShotCast"
         case .ocrTooltip: return "Extraer texto via OCR"
         case .noClipboardContent: return "Sin contenido en el portapapeles"
         case .copyButton: return "Copiar"
@@ -431,7 +431,7 @@ enum LocalizedString {
     // MARK: - French Strings
     private var frenchStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "Presse-papiers Universel pour macOS"
         case .tabGeneral: return "Général"
         case .tabShots: return "Shots"
@@ -462,16 +462,16 @@ enum LocalizedString {
         case .cornerRadius: return "Rayon des coins"
         case .shotSpacing: return "Espacement des shots"
         case .hotkeys: return "Raccourcis clavier"
-        case .openShotDrop: return "Ouvrir ShotDrop"
-        case .globalHotkey: return "Raccourci clavier global pour ouvrir ShotDrop"
+        case .openShotCast: return "Ouvrir ShotCast"
+        case .globalHotkey: return "Raccourci clavier global pour ouvrir ShotCast"
         case .changeButton: return "Changer"
         case .recordingPrompt: return "Appuyez sur la combinaison de touches désirée..."
         case .hotkeyPlaceholder: return "🚧 Fonctionnalité raccourcis sera implémentée"
-        case .aboutShotDrop: return "À propos de ShotDrop"
+        case .aboutShotCast: return "À propos de ShotCast"
         case .version: return "Version 1.0"
         case .universalClipboard: return "Gestionnaire de Presse-papiers Universel pour macOS"
-        case .settingsTooltip: return "Paramètres ShotDrop"
-        case .closeTooltip: return "Fermer ShotDrop"
+        case .settingsTooltip: return "Paramètres ShotCast"
+        case .closeTooltip: return "Fermer ShotCast"
         case .ocrTooltip: return "Extraire texte via OCR"
         case .noClipboardContent: return "Aucun contenu dans le presse-papiers"
         case .copyButton: return "Copier"
@@ -496,7 +496,7 @@ enum LocalizedString {
     // MARK: - Japanese Strings
     private var japaneseStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "macOS用ユニバーサルクリップボード"
         case .tabGeneral: return "一般"
         case .tabShots: return "ショット"
@@ -527,16 +527,16 @@ enum LocalizedString {
         case .cornerRadius: return "角の丸み"
         case .shotSpacing: return "ショット間隔"
         case .hotkeys: return "ホットキー"
-        case .openShotDrop: return "ShotDropを開く"
-        case .globalHotkey: return "ShotDropを開くグローバルホットキー"
+        case .openShotCast: return "ShotCastを開く"
+        case .globalHotkey: return "ShotCastを開くグローバルホットキー"
         case .changeButton: return "変更"
         case .recordingPrompt: return "希望するキーの組み合わせを押してください..."
         case .hotkeyPlaceholder: return "🚧 ホットキー機能は実装予定です"
-        case .aboutShotDrop: return "ShotDropについて"
+        case .aboutShotCast: return "ShotCastについて"
         case .version: return "バージョン 1.0"
         case .universalClipboard: return "macOS用ユニバーサルクリップボードマネージャー"
-        case .settingsTooltip: return "ShotDrop設定"
-        case .closeTooltip: return "ShotDropを閉じる"
+        case .settingsTooltip: return "ShotCast設定"
+        case .closeTooltip: return "ShotCastを閉じる"
         case .ocrTooltip: return "OCRでテキストを抽出"
         case .noClipboardContent: return "クリップボードにコンテンツがありません"
         case .copyButton: return "コピー"
@@ -561,7 +561,7 @@ enum LocalizedString {
     // MARK: - Chinese Strings
     private var chineseStrings: String {
         switch self {
-        case .appName: return "ShotDrop"
+        case .appName: return "ShotCast"
         case .appDescription: return "macOS通用剪贴板"
         case .tabGeneral: return "常规"
         case .tabShots: return "截图"
@@ -592,16 +592,16 @@ enum LocalizedString {
         case .cornerRadius: return "圆角半径"
         case .shotSpacing: return "截图间距"
         case .hotkeys: return "热键"
-        case .openShotDrop: return "打开ShotDrop"
-        case .globalHotkey: return "打开ShotDrop的全局热键"
+        case .openShotCast: return "打开ShotCast"
+        case .globalHotkey: return "打开ShotCast的全局热键"
         case .changeButton: return "更改"
         case .recordingPrompt: return "请按下所需的按键组合..."
         case .hotkeyPlaceholder: return "🚧 热键功能将被实现"
-        case .aboutShotDrop: return "关于ShotDrop"
+        case .aboutShotCast: return "关于ShotCast"
         case .version: return "版本 1.0"
         case .universalClipboard: return "macOS通用剪贴板管理器"
-        case .settingsTooltip: return "ShotDrop设置"
-        case .closeTooltip: return "关闭ShotDrop"
+        case .settingsTooltip: return "ShotCast设置"
+        case .closeTooltip: return "关闭ShotCast"
         case .ocrTooltip: return "通过OCR提取文本"
         case .noClipboardContent: return "剪贴板中没有内容"
         case .copyButton: return "复制"

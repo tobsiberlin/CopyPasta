@@ -42,7 +42,7 @@ struct SettingsView: View {
                 .foregroundStyle(modernGradient)
                 .padding(.top, 20)
             
-            Text("ShotDrop")
+            Text("ShotCast")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundStyle(modernGradient)
@@ -245,7 +245,7 @@ struct SettingsView: View {
     }
     
     private var aboutSection: some View {
-        SettingsSection(title: "Über ShotDrop", icon: "info.circle") {
+        SettingsSection(title: "Über ShotCast", icon: "info.circle") {
             VStack(spacing: 12) {
                 Text("Version 1.0")
                     .font(.subheadline)

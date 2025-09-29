@@ -30,7 +30,7 @@ class SettingsWindowManager: ObservableObject {
             defer: false
         )
         
-        settingsWindow?.title = "ShotDrop Einstellungen"
+        settingsWindow?.title = "ShotCast Einstellungen"
         settingsWindow?.contentView = NSHostingView(rootView: contentView)
         settingsWindow?.isReleasedWhenClosed = false
         settingsWindow?.center()

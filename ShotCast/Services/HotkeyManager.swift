@@ -231,7 +231,7 @@ class HotkeyManager: ObservableObject {
     
     private func hotkeyPressed() {
         DispatchQueue.main.async {
-            // Toggle ShotDrop Window
+            // Toggle ShotCast Window
             let windowManager = WindowManager.shared
             if windowManager.isWindowVisible {
                 windowManager.hideWindow()
